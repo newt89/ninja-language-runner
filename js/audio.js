@@ -1,116 +1,68 @@
-// ═══════════════════════════════════════════════════════
-//  NINJA LANGUAGE RUNNER — Audio Engine
-//  Uses Web Speech API (SpeechSynthesis) — no files needed
-// ═══════════════════════════════════════════════════════
-
+// ═══════════════════════════════════════
+//  NLR — Audio Engine
+// ═══════════════════════════════════════
 const Audio = {
-  _enabled: true,
-  _voices: [],
-  _ready: false,
-
-  init() {
-    if (!window.speechSynthesis) { this._ready = false; return; }
-    const load = () => {
-      this._voices = window.speechSynthesis.getVoices();
-      this._ready = this._voices.length > 0;
-    };
-    load();
-    window.speechSynthesis.onvoiceschanged = load;
+  _on:true, _voices:[], _ready:false,
+  init(){
+    if(!window.speechSynthesis) return;
+    const load=()=>{ this._voices=window.speechSynthesis.getVoices(); this._ready=this._voices.length>0; };
+    load(); window.speechSynthesis.onvoiceschanged=load;
   },
-
-  toggle() {
-    this._enabled = !this._enabled;
-    return this._enabled;
-  },
-
-  isEnabled() { return this._enabled; },
-
-  // Speak a word in target language
-  speak(text, lang, rate = 0.85) {
-    if (!this._enabled || !this._ready) return;
+  toggle(){ this._on=!this._on; return this._on; },
+  isEnabled(){ return this._on; },
+  speak(text,lang,rate=0.85){
+    if(!this._on||!this._ready||!text) return;
     window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = LANG_CODES[lang] || "en-US";
-    utter.rate = rate;
-    utter.pitch = 1;
-    utter.volume = 0.9;
-
-    // Try to find a matching voice
-    const match = this._voices.find(v => v.lang.startsWith(utter.lang.slice(0, 2)));
-    if (match) utter.voice = match;
-
-    window.speechSynthesis.speak(utter);
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang=LANG_CODES[lang]||"en-US"; u.rate=rate; u.pitch=1; u.volume=0.9;
+    const m=this._voices.find(v=>v.lang.startsWith(u.lang.slice(0,2)));
+    if(m) u.voice=m;
+    window.speechSynthesis.speak(u);
   },
-
-  // Play a UI sound via oscillator (no files needed)
-  beep(type = "correct") {
-    if (!this._enabled) return;
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      if (type === "correct") {
-        osc.frequency.setValueAtTime(523, ctx.currentTime);        // C5
-        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1); // E5
-        osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2); // G5
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.4);
-      } else if (type === "wrong") {
-        osc.frequency.setValueAtTime(200, ctx.currentTime);
-        osc.frequency.setValueAtTime(150, ctx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-        osc.type = "sawtooth";
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.3);
-      } else if (type === "boss") {
-        osc.frequency.setValueAtTime(100, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.5);
-        gain.gain.setValueAtTime(0.4, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-        osc.type = "square";
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.6);
-      } else if (type === "levelup") {
-        const freqs = [392, 523, 659, 784, 1046];
-        freqs.forEach((f, i) => {
-          const o2 = ctx.createOscillator();
-          const g2 = ctx.createGain();
-          o2.connect(g2); g2.connect(ctx.destination);
-          o2.frequency.value = f;
-          g2.gain.setValueAtTime(0.25, ctx.currentTime + i * 0.1);
-          g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.2);
-          o2.start(ctx.currentTime + i * 0.1);
-          o2.stop(ctx.currentTime + i * 0.1 + 0.2);
-        });
-      } else if (type === "tick") {
-        osc.frequency.value = 800;
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.05);
-      }
-    } catch(e) { /* AudioContext blocked */ }
-  },
-
-  // Dictation: speak and wait, return promise
-  speakAndWait(text, lang) {
-    return new Promise((resolve) => {
-      if (!this._enabled || !this._ready) { resolve(); return; }
+  speakAndWait(text,lang){
+    return new Promise(res=>{
+      if(!this._on||!this._ready){res();return;}
       window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = LANG_CODES[lang] || "en-US";
-      utter.rate = 0.75; // slower for dictation
-      utter.onend = resolve;
-      utter.onerror = resolve;
-      const match = this._voices.find(v => v.lang.startsWith(utter.lang.slice(0, 2)));
-      if (match) utter.voice = match;
-      window.speechSynthesis.speak(utter);
+      const u=new SpeechSynthesisUtterance(text);
+      u.lang=LANG_CODES[lang]||"en-US"; u.rate=0.75;
+      u.onend=res; u.onerror=res;
+      const m=this._voices.find(v=>v.lang.startsWith(u.lang.slice(0,2)));
+      if(m) u.voice=m;
+      window.speechSynthesis.speak(u);
     });
+  },
+  beep(type="correct"){
+    if(!this._on) return;
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)();
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      const t=ctx.currentTime;
+      if(type==="correct"){
+        o.frequency.setValueAtTime(523,t); o.frequency.setValueAtTime(659,t+.1); o.frequency.setValueAtTime(784,t+.2);
+        g.gain.setValueAtTime(.3,t); g.gain.exponentialRampToValueAtTime(.001,t+.4);
+        o.start(t); o.stop(t+.4);
+      } else if(type==="wrong"){
+        o.type="sawtooth"; o.frequency.setValueAtTime(200,t); o.frequency.setValueAtTime(140,t+.15);
+        g.gain.setValueAtTime(.3,t); g.gain.exponentialRampToValueAtTime(.001,t+.3);
+        o.start(t); o.stop(t+.3);
+      } else if(type==="levelup"){
+        [392,523,659,784,1046].forEach((f,i)=>{
+          const o2=ctx.createOscillator(),g2=ctx.createGain();
+          o2.connect(g2);g2.connect(ctx.destination);
+          o2.frequency.value=f;
+          g2.gain.setValueAtTime(.2,t+i*.1);g2.gain.exponentialRampToValueAtTime(.001,t+i*.1+.2);
+          o2.start(t+i*.1);o2.stop(t+i*.1+.2);
+        });
+      } else if(type==="boss"){
+        o.type="square"; o.frequency.setValueAtTime(100,t); o.frequency.exponentialRampToValueAtTime(400,t+.5);
+        g.gain.setValueAtTime(.4,t); g.gain.exponentialRampToValueAtTime(.001,t+.6);
+        o.start(t); o.stop(t+.6);
+      } else if(type==="tick"){
+        o.frequency.value=800;
+        g.gain.setValueAtTime(.1,t); g.gain.exponentialRampToValueAtTime(.001,t+.05);
+        o.start(t); o.stop(t+.05);
+      }
+    }catch(e){}
   }
 };
