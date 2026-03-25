@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ninja Language Runner · Language Mastery Engine</title>
+  <meta name="description" content="Skill-based language learning game. Master Spanish, Arabic, Russian, Mandarin, German, Sanskrit through reflex training.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN: AUTH
+═══════════════════════════════════════════════ -->
+<div id="screen-auth" class="screen active">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;">
+
+    <div class="auth-logo">
+      <h1>🥷 NINJA LANGUAGE RUNNER</h1>
+      <div class="sub">LANGUAGE MASTERY ENGINE · v1.0</div>
+    </div>
+
+    <div class="auth-box">
+      <h2 id="auth-title">LOGIN</h2>
+      <div class="form-row">
+        <label>USERNAME</label>
+        <input type="text" id="auth-user" placeholder="Enter username" autocomplete="off">
+      </div>
+      <div class="form-row">
+        <label>PASSWORD</label>
+        <input type="password" id="auth-pass" placeholder="Enter password">
+      </div>
+      <div class="auth-error" id="auth-error"></div>
+      <button class="btn-primary" id="auth-btn" style="width:100%">LOGIN</button>
+      <div class="auth-footer">
+        <button id="auth-toggle">No account? Register</button>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--textdim);text-align:center;max-width:320px">
+      All data stored locally in your browser. No server required.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN: DASHBOARD
+═══════════════════════════════════════════════ -->
+<div id="screen-dashboard" class="screen">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div class="dash-logo">🥷 NLR</div>
+    <div class="dash-user-info">
+      <span id="dash-lang-flag" style="font-size:18px">🌐</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:12px" id="dash-username">—</span>
+      <div class="rank-badge" id="dash-rank">INITIATE</div>
+      <span style="font-family:'Orbitron',sans-serif;font-size:11px;color:var(--accent)" id="dash-level">LVL 1</span>
+    </div>
+    <div class="dash-nav" style="display:flex;gap:6px">
+      <button class="btn-ghost" onclick="UI.showStats()">📊 STATS</button>
+      <button class="btn-secondary" onclick="UI.showModeSelect()">▶ PLAY</button>
+      <button class="btn-ghost" onclick="Auth.logout();UI.showAuth();UI.showLogin()">EXIT</button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="dash-body">
+
+    <!-- XP bar -->
+    <div style="margin-bottom:16px;background:var(--panel);border:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:14px">
+      <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--textdim);white-space:nowrap">TOTAL XP</span>
+      <div style="flex:1;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden">
+        <div id="xp-bar" style="height:100%;background:linear-gradient(90deg,#00c49a,#00f5c4);width:0%;transition:width 0.8s ease;box-shadow:0 0 8px rgba(0,245,196,0.5)"></div>
+      </div>
+      <span style="font-family:'Orbitron',sans-serif;font-size:13px;color:var(--accent)" id="dash-xp">0 XP</span>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="val" id="dash-games">0</span>
+        <span class="lbl">GAMES PLAYED</span>
+      </div>
+      <div class="stat-card" style="--accent:var(--accent2);">
+        <span class="val accent2" id="dash-correct">0</span>
+        <span class="lbl">CORRECT ANSWERS</span>
+      </div>
+      <div class="stat-card" style="">
+        <span class="val accent3" id="dash-acc">0%</span>
+        <span class="lbl">ACCURACY</span>
+      </div>
+      <div class="stat-card">
+        <span class="val accent4" id="dash-streak">0</span>
+        <span class="lbl">BEST STREAK</span>
+      </div>
+    </div>
+
+    <!-- Language Selector -->
+    <div class="lang-selector" style="margin-bottom:16px">
+      <div class="panel-title">SELECT TARGET LANGUAGE</div>
+      <div class="lang-grid" id="lang-grid">
+        <!-- Built by JS -->
+      </div>
+    </div>
+
+    <!-- Charts grid -->
+    <div class="charts-grid">
+      <div class="chart-wrap">
+        <div class="panel-title">WEEKLY XP ACTIVITY</div>
+        <canvas id="chart-weekly" width="400" height="140"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="panel-title">MODE DISTRIBUTION</div>
+        <canvas id="chart-modes" width="200" height="140"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="panel-title">SKILL PROFILE</div>
+        <canvas id="chart-radar" width="200" height="140"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="panel-title">LANGUAGE XP BREAKDOWN</div>
+        <canvas id="chart-langs" width="400" height="140"></canvas>
+      </div>
+    </div>
+
+    <!-- Quick start -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+      <button class="btn-primary" onclick="UI.showModeSelect()" style="flex:1;min-width:160px;padding:14px">▶ START TRAINING</button>
+      <button class="btn-secondary" onclick="UI.showStats()" style="flex:1;min-width:160px;padding:14px">📊 VIEW STATS</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN: MODE SELECT
+═══════════════════════════════════════════════ -->
+<div id="screen-modes" class="screen">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:20px;">
+
+    <div class="mode-header">
+      <h2>SELECT TRAINING MODE</h2>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--textdim)" id="mode-lang-display">—</div>
+    </div>
+
+    <div class="mode-grid">
+
+      <div class="mode-card reflex" onclick="startGame('reflex')">
+        <div class="mode-difficulty">SPEED</div>
+        <span class="mode-icon">⚡</span>
+        <h3>REFLEX MODE</h3>
+        <p>Flash vocabulary. Timed inputs. 60-second sprint. Builds automatic recall speed.</p>
+      </div>
+
+      <div class="mode-card ninja" onclick="startGame('ninja')">
+        <div class="mode-difficulty">ACTION</div>
+        <span class="mode-icon">🥷</span>
+        <h3>WORD NINJA</h3>
+        <p>Enemies fall from above. Type the translation before they reach the ground.</p>
+      </div>
+
+      <div class="mode-card syntax" onclick="startGame('syntax')">
+        <div class="mode-difficulty">LOGIC</div>
+        <span class="mode-icon">🧩</span>
+        <h3>SYNTAX MODE</h3>
+        <p>Arrange shuffled words into correct sentences. Master grammar and word order.</p>
+      </div>
+
+      <div class="mode-card dictation" onclick="startGame('dictation')">
+        <div class="mode-difficulty">ELITE</div>
+        <span class="mode-icon">🎧</span>
+        <h3>DICTATION MODE</h3>
+        <p>Hear it, type it exactly. The hardest mode — where real fluency forms.</p>
+      </div>
+
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button class="btn-ghost" onclick="UI.showDashboard()">← BACK</button>
+      <button class="btn-ghost" onclick="Audio.toggle();this.textContent=Audio.isEnabled()?'🔊 AUDIO ON':'🔇 AUDIO OFF'" style="color:var(--accent)">🔊 AUDIO ON</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN: GAME
+═══════════════════════════════════════════════ -->
+<div id="screen-game" class="screen">
+
+  <!-- HUD -->
+  <div class="game-hud">
+    <div class="hud-item">
+      <span class="hud-lbl">SCORE</span>
+      <span class="hud-val" id="hud-score">0</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-lbl">STREAK</span>
+      <span class="hud-val accent2" id="hud-streak">🔥 0</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-lbl">LIVES</span>
+      <span class="hud-val" style="font-size:14px" id="hud-lives">❤️❤️❤️</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-lbl">TIME</span>
+      <span class="hud-val" id="hud-timer">60s</span>
+    </div>
+    <div class="hud-sep"></div>
+    <div id="hud-lang" style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--textdim)">—</div>
+    <div id="hud-mode">MODE</div>
+    <button class="btn-ghost" onclick="Game.stop()" style="font-size:10px">✕ QUIT</button>
+  </div>
+
+  <!-- Feedback overlay -->
+  <div id="feedback-flash"></div>
+
+  <!-- ── REFLEX PANEL ── -->
+  <div id="panel-reflex" class="game-panel" style="display:none">
+    <div class="reflex-card">
+      <span id="reflex-word">—</span>
+      <div id="reflex-cat"></div>
+      <div id="reflex-pinyin"></div>
+    </div>
+    <div class="reflex-hint">TYPE THE TRANSLATION → ENTER</div>
+    <input type="text" class="answer-input" id="input-reflex"
+      placeholder="type translation…" autocomplete="off" spellcheck="false">
+  </div>
+
+  <!-- ── NINJA PANEL ── -->
+  <div id="panel-ninja" class="game-panel" style="display:none;padding:0;flex-direction:column;">
+    <canvas id="ninja-canvas"></canvas>
+    <div class="ninja-input-bar">
+      <span class="ninja-hint">TYPE TRANSLATION:</span>
+      <input type="text" class="answer-input" id="input-ninja"
+        placeholder="translate the falling word…" autocomplete="off" spellcheck="false"
+        style="flex:1;text-align:left;font-size:15px">
+    </div>
+  </div>
+
+  <!-- ── SYNTAX PANEL ── -->
+  <div id="panel-syntax" class="game-panel" style="display:none">
+    <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--textdim);letter-spacing:0.2em">ARRANGE THE SENTENCE</div>
+    <div class="syntax-english" id="syntax-english">—</div>
+    <div class="syntax-bank" id="syntax-bank"></div>
+    <div class="syntax-answer dim" id="syntax-answer">— tap words above —</div>
+    <input type="text" id="input-syntax-hidden" style="position:absolute;opacity:0;pointer-events:none">
+    <button class="btn-primary" id="syntax-check">CHECK SENTENCE</button>
+    <button class="btn-secondary" onclick="UI._updateSyntaxAnswer()">CLEAR</button>
+  </div>
+
+  <!-- ── DICTATION PANEL ── -->
+  <div id="panel-dictation" class="game-panel" style="display:none">
+    <div class="dictation-visual">
+      <span class="dictation-icon">🎧</span>
+      <div id="dictation-prompt">Loading...</div>
+      <div id="dictation-cat"></div>
+    </div>
+    <button class="btn-secondary" id="dictation-replay"
+      onclick="if(Game.currentWord)Audio.speak(Game.currentWord.tr,Game.lang)">
+      🔁 REPLAY AUDIO
+    </button>
+    <input type="text" class="answer-input" id="input-dictation"
+      placeholder="type what you heard…" autocomplete="off" spellcheck="false">
+    <div id="dictation-result"></div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN: RESULTS
+═══════════════════════════════════════════════ -->
+<div id="screen-results" class="screen">
+  <div style="display:flex;align-items:center;justify-content:center;flex:1;padding:20px;">
+    <div class="results-box">
+
+      <div class="results-title">▸ SESSION COMPLETE ◂</div>
+
+      <div class="results-score">
+        <span class="big" id="result-score">0</span>
+        <span class="lbl">FINAL SCORE</span>
+      </div>
+
+      <div class="results-rank">
+        <div class="rank" id="result-rank">INITIATE</div>
+        <div class="level" id="result-level">Level 1</div>
+      </div>
+
+      <div class="results-xp" id="result-xp">+0 XP</div>
+
+      <div class="results-grid">
+        <div class="res-cell">
+          <span class="v accent" id="result-acc">0%</span>
+          <span class="l">ACCURACY</span>
+        </div>
+        <div class="res-cell">
+          <span class="v" style="color:#00f5c4" id="result-correct">0</span>
+          <span class="l">CORRECT</span>
+        </div>
+        <div class="res-cell">
+          <span class="v red" id="result-wrong">0</span>
+          <span class="l">WRONG</span>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-bottom:16px">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--textdim)">BEST STREAK: </span>
+        <span style="font-family:'Orbitron',sans-serif;font-size:14px;color:var(--accent2)" id="result-streak">0</span>
+      </div>
+
+      <div class="results-btns">
+        <button class="btn-primary" onclick="restartSameMode()">▶ PLAY AGAIN</button>
+        <button class="btn-secondary" onclick="UI.showModeSelect()">MODES</button>
+        <button class="btn-ghost" onclick="UI.showDashboard()">HOME</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN: STATS
+═══════════════════════════════════════════════ -->
+<div id="screen-stats" class="screen">
+
+  <div class="stats-header">
+    <h2>📊 PLAYER STATISTICS</h2>
+    <div style="display:flex;gap:8px">
+      <button class="btn-ghost" onclick="UI.showDashboard()">← DASHBOARD</button>
+    </div>
+  </div>
+
+  <div class="stats-body">
+
+    <!-- Line chart -->
+    <div class="stats-section">
+      <h3>WEEKLY PROGRESS</h3>
+      <div class="chart-wrap" style="height:160px">
+        <canvas id="stats-chart-line" width="600" height="140"></canvas>
+      </div>
+    </div>
+
+    <!-- Mode stats -->
+    <div class="stats-section">
+      <h3>MODE PERFORMANCE</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>MODE</th><th>GAMES</th><th>BEST SCORE</th><th>AVG ACCURACY</th>
+          </tr>
+        </thead>
+        <tbody id="mode-stats-tbody">
+          <!-- built by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Session history -->
+    <div class="stats-section">
+      <h3>SESSION HISTORY (LAST 20)</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>DATE</th><th>MODE</th><th>LANGUAGE</th><th>SCORE</th><th>ACCURACY</th><th>XP</th></tr>
+        </thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Word mastery -->
+    <div class="stats-section">
+      <h3>WORD MASTERY</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>LANG</th><th>WORD</th><th>MASTERY</th><th>%</th><th>C/T</th></tr>
+        </thead>
+        <tbody id="mastery-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════ -->
+<script src="data/words.js"></script>
+<script src="js/memory.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
