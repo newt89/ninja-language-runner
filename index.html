@@ -495,7 +495,7 @@ function drawWordSlime(ctx,x,y,englishWord,t){
   ctx.moveTo(0,-sz*.7+Math.sin(w)*2);
   ctx.bezierCurveTo(sz*.9,-sz*.5,sz+Math.sin(w+1)*4,sz*.15,sz*.55,sz*.6);
   ctx.bezierCurveTo(sz*.2,sz*.95,-sz*.25,sz*.9,-sz*.6,sz*.6);
-  ctx.bezierCurveTo(-sz-.sin(w)*3,sz*.1,-sz*.85,-sz*.5,0,-sz*.7+Math.sin(w)*2);
+  ctx.bezierCurveTo(-sz-Math.sin(w)*3,sz*.1,-sz*.85,-sz*.5,0,-sz*.7+Math.sin(w)*2);
   ctx.fill();
   // Inner glow
   ctx.fillStyle="rgba(255,100,60,.3)";ctx.beginPath();ctx.ellipse(-6,-8,18,14,-.3,0,Math.PI*2);ctx.fill();
