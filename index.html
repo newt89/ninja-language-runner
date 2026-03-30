@@ -370,12 +370,32 @@ const norm=s=>s.replace(/[^\w\u0080-\uFFFF]/g,"").toLowerCase();
 // ═══════════════════════════════════════
 const K="nlr4";
 const Auth={
-  _u(){return JSON.parse(localStorage.getItem(K+"_u")||"{}");},
-  _s(u){localStorage.setItem(K+"_u",JSON.stringify(u));},
-  reg(n,p){const u=this._u();if(u[n])return{ok:false,err:"Username taken"};const s=Math.random().toString(36).slice(2);u[n]={hash:btoa(p+s),salt:s,pro:this._blank(n)};this._s(u);return{ok:true};},
-  log(n,p){const u=this._u(),r=u[n];if(!r)return{ok:false,err:"Not found"};if(btoa(p+r.salt)!==r.hash)return{ok:false,err:"Wrong password"};sessionStorage.setItem(K+"_s",n);return{ok:true};},
-  out(){sessionStorage.removeItem(K+"_s");},cur(){return sessionStorage.getItem(K+"_s");},
-  getPro(n){return this._u()[n]?.pro||null;},savePro(n,p){const u=this._u();if(u[n])u[n].pro=p;this._s(u);},
+  _h(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(36);},
+  _u(){try{return JSON.parse(localStorage.getItem(K+"_u")||"{}");}catch(e){return{};}},
+  _s(u){try{localStorage.setItem(K+"_u",JSON.stringify(u));}catch(e){console.error("Save failed",e);}},
+  reg(n,p){
+    if(!n||!p)return{ok:false,err:"Fill all fields"};
+    const u=this._u();
+    if(u[n])return{ok:false,err:"Username already taken"};
+    const salt=Math.random().toString(36).slice(2,10);
+    const hash=this._h(p+salt);
+    u[n]={hash,salt,pro:this._blank(n)};
+    this._s(u);
+    return{ok:true};
+  },
+  log(n,p){
+    if(!n||!p)return{ok:false,err:"Fill all fields"};
+    const u=this._u();
+    const r=u[n];
+    if(!r)return{ok:false,err:"Username not found"};
+    if(this._h(p+r.salt)!==r.hash)return{ok:false,err:"Wrong password"};
+    sessionStorage.setItem(K+"_s",n);
+    return{ok:true};
+  },
+  out(){sessionStorage.removeItem(K+"_s");},
+  cur(){return sessionStorage.getItem(K+"_s");},
+  getPro(n){try{return this._u()[n]?.pro||null;}catch(e){return null;}},
+  savePro(n,p){const u=this._u();if(u[n]){u[n].pro=p;this._s(u);}},
   _blank(n){return{username:n,xp:0,level:1,rank:"Initiate",selectedLang:"spanish",totalGames:0,totalCorrect:0,totalWrong:0,streakMax:0,history:[],wordMemory:{},stats:{byMode:{reflex:{},ninja:{},syntax:{},dictation:{}},byLang:{}}};}
 };
 const Mem={
@@ -1287,8 +1307,29 @@ function showResults(score,acc,xp,ok,bad,streak){
 // ═══════════════════════════════════════
 window.addEventListener("DOMContentLoaded",()=>{
   Aud.init();
-  const doLogin=()=>{const u=document.getElementById("au").value.trim(),p=document.getElementById("ap").value;if(!u||!p){document.getElementById("aerr").textContent="Fill all fields";return;}const r=Auth.log(u,p);if(!r.ok){document.getElementById("aerr").textContent=r.err;return;}Mem.load();showDash();};
-  const doReg=()=>{const u=document.getElementById("au").value.trim(),p=document.getElementById("ap").value;if(!u||!p){document.getElementById("aerr").textContent="Fill all fields";return;}if(u.length<3){document.getElementById("aerr").textContent="Username min 3 chars";return;}if(p.length<4){document.getElementById("aerr").textContent="Password min 4 chars";return;}const r=Auth.reg(u,p);if(!r.ok){document.getElementById("aerr").textContent=r.err;return;}Auth.log(u,p);Mem.load();showDash();};
+  const setErr=msg=>{const e=document.getElementById("aerr");if(e)e.textContent=msg;};
+  const doLogin=()=>{
+    try{
+      const u=document.getElementById("au").value.trim(),p=document.getElementById("ap").value;
+      if(!u||!p){setErr("Fill all fields");return;}
+      const r=Auth.log(u,p);
+      if(!r.ok){setErr(r.err);return;}
+      Mem.load();showDash();
+    }catch(e){setErr("Error: "+e.message);console.error(e);}
+  };
+  const doReg=()=>{
+    try{
+      const u=document.getElementById("au").value.trim(),p=document.getElementById("ap").value;
+      if(!u||!p){setErr("Fill all fields");return;}
+      if(u.length<3){setErr("Username: min 3 characters");return;}
+      if(p.length<4){setErr("Password: min 4 characters");return;}
+      const r=Auth.reg(u,p);
+      if(!r.ok){setErr(r.err);return;}
+      const r2=Auth.log(u,p);
+      if(!r2.ok){setErr("Registered! Now login.");return;}
+      Mem.load();showDash();
+    }catch(e){setErr("Error: "+e.message);console.error(e);}
+  };
   document.getElementById("abtn").onclick=doLogin;
   let isLogin=true;
   document.getElementById("atog").onclick=()=>{isLogin=!isLogin;document.getElementById("auth-title").textContent=isLogin?"LOGIN":"REGISTER";document.getElementById("abtn").textContent=isLogin?"LOGIN":"CREATE ACCOUNT";document.getElementById("abtn").onclick=isLogin?doLogin:doReg;document.getElementById("atog").textContent=isLogin?"No account? Register":"Have account? Login";document.getElementById("aerr").textContent="";};
