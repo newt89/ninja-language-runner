@@ -479,163 +479,297 @@ function isoBlock(ctx,x,y,tw,th,bh,topC,leftC,rightC){
 }
 
 // ── ENEMY DRAW FUNCTIONS ─────────────────────────────────────────────────────
-// CRITICAL: Enemies NEVER show the translation. They show only the English word
-// and a visual representation of their type. The answer appears ONLY in MC buttons.
+// Enemies NEVER show the translation - only English word + visual design
+// All enemies drawn large (60-80px tall) to be clearly visible
 
-function drawWordSlime(ctx,x,y,englishWord,t){
-  // Large amorphous orange-red blob. Inside: the English word + characters from the image (語,入,Apple as visual texture).
-  // The TRANSLATION is NEVER shown anywhere on the enemy.
+function drawWordSlime(ctx,x,y,word,t){
+  // Big orange-red amorphous blob like the image
+  // Letters bubbling inside, drips, angry eyes, no translation shown
   ctx.save();ctx.translate(x,y);
+  const p=t*.05;
   // Drop shadow
-  ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.ellipse(0,18,32,10,0,0,Math.PI*2);ctx.fill();
-  // Main blob body — lumpy amorphous shape like image
-  const w=t*.06,sz=20;
-  ctx.fillStyle="#cc2200";
+  ctx.fillStyle="rgba(0,0,0,.4)";ctx.beginPath();ctx.ellipse(0,28,36,10,0,0,Math.PI*2);ctx.fill();
+  // Outer glow
+  ctx.shadowBlur=18;ctx.shadowColor="#cc2200";
+  // Main body - large irregular blob
+  ctx.fillStyle="#dd2200";
   ctx.beginPath();
-  ctx.moveTo(0,-sz*.7+Math.sin(w)*2);
-  ctx.bezierCurveTo(sz*.9,-sz*.5,sz+Math.sin(w+1)*4,sz*.15,sz*.55,sz*.6);
-  ctx.bezierCurveTo(sz*.2,sz*.95,-sz*.25,sz*.9,-sz*.6,sz*.6);
-  ctx.bezierCurveTo(-sz-Math.sin(w)*3,sz*.1,-sz*.85,-sz*.5,0,-sz*.7+Math.sin(w)*2);
+  ctx.moveTo(0,-38+Math.sin(p)*3);
+  ctx.bezierCurveTo(42,-32,50+Math.sin(p+1)*5,10,38,26);
+  ctx.bezierCurveTo(24,40,-24,42,-38,26);
+  ctx.bezierCurveTo(-50+Math.sin(p)*4,10,-42,-30,0,-38+Math.sin(p)*3);
   ctx.fill();
-  // Inner glow
-  ctx.fillStyle="rgba(255,100,60,.3)";ctx.beginPath();ctx.ellipse(-6,-8,18,14,-.3,0,Math.PI*2);ctx.fill();
-  // Drips at bottom
-  for(let i=0;i<4;i++){const dx=(-18+i*12),dh=8+Math.abs(Math.sin(w+i*1.4))*9;ctx.fillStyle="#aa1800";ctx.beginPath();ctx.ellipse(dx,sz*.58+dh*.5,4,dh,0,0,Math.PI*2);ctx.fill();}
-  // Visual texture characters (decorative, from image — NOT the translation)
-  ctx.globalAlpha=.45;ctx.fillStyle="#ffaa88";ctx.font="bold 10px serif";ctx.textAlign="center";
-  ["語","入","字"].forEach((c,i)=>{ctx.fillText(c,-14+i*14,2+Math.sin(w+i)*.5*3);});
+  // Highlight sheen
+  ctx.fillStyle="rgba(255,120,60,.4)";
+  ctx.beginPath();ctx.ellipse(-10,-18,16,12,-.4,0,Math.PI*2);ctx.fill();
+  // Inner darker core
+  ctx.fillStyle="#aa1800";
+  ctx.beginPath();ctx.ellipse(2,0,22,20,0,0,Math.PI*2);ctx.fill();
+  ctx.shadowBlur=0;
+  // Drips (3 bottom drips like image)
+  ctx.fillStyle="#bb1a00";
+  [[-18,0],[0,4],[18,0]].forEach(([dx,off])=>{
+    const h=14+Math.abs(Math.sin(p+dx))*10;
+    ctx.beginPath();
+    ctx.moveTo(dx-6,20+off);ctx.quadraticCurveTo(dx,24+off+h,dx+6,20+off);
+    ctx.fill();
+  });
+  // Bubbling characters inside (decorative, NOT translation)
+  ctx.globalAlpha=.5;ctx.fillStyle="#ffcc88";
+  ctx.font="bold 11px serif";ctx.textAlign="center";
+  ctx.fillText("語",-14,-2+Math.sin(p)*2);
+  ctx.fillText("入",10,6+Math.cos(p)*2);
   ctx.globalAlpha=1;
-  // Angry eyes
-  for(const ex of[-12,12]){ctx.beginPath();ctx.arc(ex,-14,5,0,Math.PI*2);ctx.fillStyle="#ff8833";ctx.fill();ctx.beginPath();ctx.arc(ex,-14,2.5,0,Math.PI*2);ctx.fillStyle="#1a0000";ctx.fill();ctx.beginPath();ctx.arc(ex-1,-15,1,0,Math.PI*2);ctx.fillStyle="#fff";ctx.fill();}
-  // Angry brows
-  ctx.strokeStyle="#660000";ctx.lineWidth=2.2;ctx.lineCap="round";
-  ctx.beginPath();ctx.moveTo(-17,-20);ctx.lineTo(-7,-16);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(17,-20);ctx.lineTo(7,-16);ctx.stroke();
-  // ENGLISH WORD displayed on enemy (this is the question prompt, not the answer)
-  ctx.fillStyle="#fff";ctx.font="bold 11px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText(englishWord,0,4);
+  // Angry eyes (large, prominent)
+  [[-14,-20],[14,-20]].forEach(([ex,ey])=>{
+    // White
+    ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(ex,ey,7,6,0,0,Math.PI*2);ctx.fill();
+    // Iris
+    ctx.fillStyle="#ff6600";ctx.beginPath();ctx.ellipse(ex,ey,4,4,0,0,Math.PI*2);ctx.fill();
+    // Pupil
+    ctx.fillStyle="#111";ctx.beginPath();ctx.ellipse(ex+1,ey,2,2,0,0,Math.PI*2);ctx.fill();
+    // Highlight
+    ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(ex-1,ey-1,1,1,0,0,Math.PI*2);ctx.fill();
+  });
+  // Angry V-brows
+  ctx.strokeStyle="#550000";ctx.lineWidth=3;ctx.lineCap="round";
+  ctx.beginPath();ctx.moveTo(-22,-28);ctx.lineTo(-10,-22);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(22,-28);ctx.lineTo(10,-22);ctx.stroke();
+  // Mouth grimace
+  ctx.strokeStyle="#880000";ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(-10,8);ctx.quadraticCurveTo(0,4,10,8);ctx.stroke();
+  // English word label (the QUESTION, not answer)
+  ctx.shadowBlur=6;ctx.shadowColor="#000";
+  ctx.fillStyle="#fff";ctx.font="bold 13px 'Share Tech Mono'";ctx.textAlign="center";
+  ctx.fillText(word,0,2);
+  ctx.shadowBlur=0;
   ctx.restore();
 }
 
-function drawFalseTwin(ctx,x,y,englishWord,t){
-  // Two orange lizard/dragon heads. Shows only English word on body. 
-  // One head shows "???" to indicate ambiguity. NO translation shown.
-  ctx.save();ctx.translate(x,y);ctx.scale(1.2,1.2);
-  ctx.fillStyle="rgba(0,0,0,.3)";ctx.beginPath();ctx.ellipse(0,16,30,8,0,0,Math.PI*2);ctx.fill();
-  // Draw two heads
-  [[-20,-.15],[20,.15]].forEach(([dx,tilt],idx)=>{
+function drawFalseTwin(ctx,x,y,word,t){
+  // Two fused orange lizard heads - one shows word, other shows ???
+  ctx.save();ctx.translate(x,y);
+  const p=t*.04;
+  // Shadow
+  ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.ellipse(0,30,38,10,0,0,Math.PI*2);ctx.fill();
+  // Connecting body
+  ctx.fillStyle="#bb4400";ctx.beginPath();ctx.ellipse(0,12,30,16,0,0,Math.PI*2);ctx.fill();
+  // Two reptile heads
+  [[-24,-1],[24,1]].forEach(([dx,tilt],idx)=>{
     ctx.save();ctx.translate(dx,0);
     // Neck
-    ctx.fillStyle=idx===0?"#cc5500":"#bb4400";ctx.beginPath();ctx.ellipse(0,8,8,12,tilt,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=idx===0?"#cc4400":"#bb3800";
+    ctx.beginPath();ctx.ellipse(0,4,10,14,tilt*.1,0,Math.PI*2);ctx.fill();
     // Head
-    ctx.fillStyle=idx===0?"#dd5500":"#cc4400";ctx.beginPath();ctx.ellipse(0,-10,13,17,tilt*.5,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=10;ctx.shadowColor=idx===0?"#ff6600":"#ff4400";
+    ctx.fillStyle=idx===0?"#dd5500":"#cc4400";
+    ctx.beginPath();ctx.ellipse(0,-14,16,20,tilt*.08,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;
     // Snout
-    ctx.fillStyle="#bb4400";ctx.beginPath();ctx.ellipse(dx<0?-6:6,-2,8,6,0,0,Math.PI*2);ctx.fill();
-    // Teeth (white)
-    ctx.fillStyle="#fff";for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo((dx<0?-10:6)+i*3,0);ctx.lineTo((dx<0?-9:7)+i*3,5);ctx.lineTo((dx<0?-8:8)+i*3,0);ctx.closePath();ctx.fill();}
+    ctx.fillStyle=idx===0?"#cc4400":"#bb3800";
+    ctx.beginPath();ctx.ellipse(dx<0?-8:8,-6,11,8,0,0,Math.PI*2);ctx.fill();
+    // Teeth row
+    ctx.fillStyle="#eee";
+    for(let i=0;i<4;i++){
+      const tx=(dx<0?-14:4)+i*4;
+      ctx.beginPath();ctx.moveTo(tx,-2);ctx.lineTo(tx-2,6);ctx.lineTo(tx+2,6);ctx.closePath();ctx.fill();
+    }
     // Glowing eye
-    ctx.beginPath();ctx.arc(dx<0?4:-4,-15,4,0,Math.PI*2);ctx.fillStyle="#ffaa00";ctx.fill();
-    ctx.beginPath();ctx.arc(dx<0?4:-4,-15,2,0,Math.PI*2);ctx.fillStyle="#1a0000";ctx.fill();
-    // Spiky frills on top
-    ctx.fillStyle="#ff6600";for(let f=0;f<4;f++){const fx=(f-1.5)*5;ctx.beginPath();ctx.moveTo(fx,-22);ctx.lineTo(fx-2.5,-32);ctx.lineTo(fx+2.5,-32);ctx.closePath();ctx.fill();}
+    ctx.fillStyle="#ffdd00";ctx.beginPath();ctx.ellipse(dx<0?5:-5,-18,5,5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#1a0800";ctx.beginPath();ctx.ellipse(dx<0?5:-5,-18,2.5,3.5,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(dx<0?3:-6,-20,1.2,1.2,0,0,Math.PI*2);ctx.fill();
+    // Head spikes
+    ctx.fillStyle="#ff6600";
+    for(let s=0;s<4;s++){const sx=(s-1.5)*7;ctx.beginPath();ctx.moveTo(sx,-26);ctx.lineTo(sx-3,-38);ctx.lineTo(sx+3,-38);ctx.closePath();ctx.fill();}
+    // Nostrils
+    ctx.fillStyle="#330000";
+    ctx.beginPath();ctx.ellipse(dx<0?-10:6,-8,2,2,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(dx<0?-6:10,-8,2,2,0,0,Math.PI*2);ctx.fill();
+    // Label
+    ctx.shadowBlur=4;ctx.shadowColor="#000";
+    ctx.fillStyle="#fff";ctx.font="bold 12px 'Share Tech Mono'";ctx.textAlign="center";
+    ctx.fillText(idx===0?word:"???",0,-14);
+    ctx.shadowBlur=0;
     ctx.restore();
   });
-  // Connecting body
-  ctx.fillStyle="rgba(180,70,0,.5)";ctx.beginPath();ctx.ellipse(0,6,22,11,0,0,Math.PI*2);ctx.fill();
-  // English word on body — question prompt
-  ctx.fillStyle="#fff";ctx.font="bold 10px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText(englishWord,0,6);
-  // One head shows "???" to show it's a confusion enemy
-  ctx.fillStyle="rgba(180,200,255,.7)";ctx.font="bold 9px 'Share Tech Mono'";ctx.fillText("???",20,-10);
+  // Flickering indicator
+  if(Math.sin(p*3)>0){
+    ctx.fillStyle="rgba(255,200,100,.6)";ctx.font="10px 'Share Tech Mono'";ctx.textAlign="center";
+    ctx.fillText("CHOOSE!",0,28);
+  }
   ctx.restore();
 }
 
-function drawSentenceKnight(ctx,x,y,englishWord,t){
-  // Full armored figure with labeled body parts. English word on torso plate.
-  // NO translation anywhere.
-  const col="#ddaa44",dk="#886622",lt="#eeccaa";
-  ctx.save();ctx.translate(x,y);ctx.scale(1.3,1.3);
-  const bob=Math.sin(t*.07)*2;
-  ctx.fillStyle="rgba(0,0,0,.28)";ctx.beginPath();ctx.ellipse(0,24,18,6,0,0,Math.PI*2);ctx.fill();
-  // Greaves
-  for(const fx of[-8,8]){ctx.fillStyle=dk;ctx.beginPath();ctx.roundRect(fx-5,14+bob,10,9,2);ctx.fill();ctx.strokeStyle=col+"aa";ctx.lineWidth=1;ctx.stroke();}
-  // Leg plates (labeled "obj")
-  for(const lx of[-10,4]){ctx.fillStyle=col+"88";ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(lx,3+bob,10,12,2);ctx.fill();ctx.stroke();ctx.fillStyle=dk;ctx.font="6px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("obj",lx+5,10+bob);}
-  // Torso armor — shows English word (the question)
-  ctx.fillStyle=col+"bb";ctx.strokeStyle=lt;ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-13,-18+bob,26,22,3);ctx.fill();ctx.stroke();
-  ctx.fillStyle="#fff";ctx.font="bold 8px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText(englishWord.slice(0,9),0,-7+bob);
-  ctx.fillStyle=col;ctx.font="6px 'Share Tech Mono'";ctx.fillText("[VERB]",0,2+bob);
-  // Shoulders
-  for(const sx of[-14,14]){ctx.fillStyle=col+"99";ctx.beginPath();ctx.ellipse(sx,-19+bob,7,5,sx<0?-.4:.4,0,Math.PI*2);ctx.fill();ctx.strokeStyle=lt;ctx.lineWidth=1;ctx.stroke();}
-  // Arms
-  const arm=Math.sin(t*.1)*9;
-  for(const [ax,ay] of[[-23,-11+arm*.45],[13,-11-arm*.45]]){ctx.fillStyle=col+"77";ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(ax<0?ax-10:ax,ay+bob,10,16,2);ctx.fill();ctx.stroke();}
-  // Helmet — labeled "SUB"
-  ctx.fillStyle=col+"cc";ctx.strokeStyle=lt;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,-30+bob,12,14,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-  ctx.fillStyle="#3366aa88";ctx.beginPath();ctx.ellipse(0,-30+bob,8,5,0,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle=lt;ctx.font="bold 6px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("SUB",0,-30+bob);
-  // Helmet crest
-  ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(-4,-43+bob);ctx.lineTo(0,-52+bob);ctx.lineTo(4,-43+bob);ctx.closePath();ctx.fill();
+function drawSentenceKnight(ctx,x,y,word,t){
+  // Full armored humanoid - gold armor, labeled body parts
+  ctx.save();ctx.translate(x,y);
+  const bob=Math.sin(t*.07)*3,arm=Math.sin(t*.09)*12;
+  const gold="#ddaa33",dkGold="#886622",ltGold="#ffdd88",steel="#8899aa";
+  // Shadow
+  ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.ellipse(0,36,22,8,0,0,Math.PI*2);ctx.fill();
+  // BOOTS
+  [[-10,0],[10,0]].forEach(([bx])=>{
+    ctx.fillStyle=dkGold;ctx.beginPath();ctx.roundRect(bx-7,18+bob,14,12,3);ctx.fill();
+    ctx.strokeStyle=gold;ctx.lineWidth=1;ctx.stroke();
+  });
+  // LEGS (object plates)
+  const legSwing=Math.sin(t*.1)*8;
+  ctx.fillStyle=gold+"aa";ctx.strokeStyle=gold;ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(-16,2+bob+legSwing,13,18,3);ctx.fill();ctx.stroke();
+  ctx.fillStyle=gold;ctx.font="bold 7px 'Share Tech Mono'";ctx.textAlign="center";
+  ctx.fillText("obj",-9,12+bob+legSwing);
+  ctx.fillStyle=gold+"aa";ctx.strokeStyle=gold;
+  ctx.beginPath();ctx.roundRect(3,2+bob-legSwing,13,18,3);ctx.fill();ctx.stroke();
+  ctx.fillStyle=gold;ctx.fillText("obj",10,12+bob-legSwing);
+  // TORSO - main armor plate with word
+  ctx.shadowBlur=8;ctx.shadowColor=gold;
+  ctx.fillStyle=gold+"cc";ctx.strokeStyle=ltGold;ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.roundRect(-16,-22+bob,32,26,4);ctx.fill();ctx.stroke();
+  // Verb plate label
+  ctx.fillStyle="#fff";ctx.font="bold 9px 'Share Tech Mono'";ctx.textAlign="center";
+  ctx.fillText(word.slice(0,8),0,-9+bob);
+  ctx.fillStyle=gold;ctx.font="7px 'Share Tech Mono'";ctx.fillText("[VERB]",0,-1+bob);
+  ctx.shadowBlur=0;
+  // SHOULDERS
+  [[-18,-18+bob],[18,-18+bob]].forEach(([sx,sy])=>{
+    ctx.fillStyle=gold+"bb";ctx.beginPath();ctx.ellipse(sx,sy,10,6,sx<0?-.4:.4,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=ltGold;ctx.lineWidth=1.5;ctx.stroke();
+  });
+  // ARMS with gauntlets
+  ctx.fillStyle=gold+"88";ctx.strokeStyle=gold;ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(-32,-16+bob+arm*.5,12,22,3);ctx.fill();ctx.stroke();
+  ctx.fillStyle=dkGold;ctx.beginPath();ctx.ellipse(-26,-16+bob+arm*.5+22,7,5,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=gold+"88";ctx.strokeStyle=gold;
+  ctx.beginPath();ctx.roundRect(20,-16+bob-arm*.5,12,22,3);ctx.fill();ctx.stroke();
+  ctx.fillStyle=dkGold;ctx.beginPath();ctx.ellipse(26,-16+bob-arm*.5+22,7,5,0,0,Math.PI*2);ctx.fill();
+  // HELMET with visor
+  ctx.shadowBlur=6;ctx.shadowColor=gold;
+  ctx.fillStyle=gold+"cc";ctx.strokeStyle=ltGold;ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.ellipse(0,-36+bob,14,18,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  // Visor glow
+  ctx.fillStyle="#3366ff88";ctx.beginPath();ctx.ellipse(0,-36+bob,9,7,0,0,Math.PI*2);ctx.fill();
+  // Visor shine
+  ctx.fillStyle="#88aaff44";ctx.beginPath();ctx.ellipse(-3,-40+bob,4,3,-.4,0,Math.PI*2);ctx.fill();
+  // Helmet label
+  ctx.fillStyle=ltGold;ctx.font="bold 7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("SUB",0,-36+bob);
+  // Crest plume
+  ctx.fillStyle=gold;
+  ctx.beginPath();ctx.moveTo(-5,-52+bob);ctx.lineTo(0,-62+bob);ctx.lineTo(5,-52+bob);ctx.closePath();ctx.fill();
+  ctx.shadowBlur=0;
+  // Energy nodes on chest
+  [[12,-20+bob],[-12,-20+bob],[12,-10+bob],[-12,-10+bob]].forEach(([nx,ny])=>{
+    ctx.fillStyle="#ffff00";ctx.beginPath();ctx.arc(nx,ny,2.5,0,Math.PI*2);ctx.fill();
+  });
   ctx.restore();
 }
 
 function drawEchoWraith(ctx,x,y,t){
-  // Translucent blue ghost with waveform body. Shows sound icon. NO english word, NO translation.
-  // The English word is shown in the ninja-q-word label above.
-  ctx.save();ctx.translate(x,y);ctx.scale(1.3,1.3);
-  const alpha=.38+Math.sin(t*.05)*.14;
-  // Outer glow
-  const grd=ctx.createRadialGradient(0,-14,2,0,-14,38);
-  grd.addColorStop(0,`rgba(68,136,255,${alpha*.7})`);grd.addColorStop(1,"rgba(0,0,0,0)");
-  ctx.fillStyle=grd;ctx.beginPath();ctx.arc(0,-14,38,0,Math.PI*2);ctx.fill();
-  // Waveform body (key feature from image)
-  ctx.fillStyle=`rgba(68,136,255,${alpha*.85})`;
-  ctx.beginPath();ctx.moveTo(-24,-2);
-  for(let px=-24;px<=24;px+=2)ctx.lineTo(px,Math.sin((px+t*3)*.25)*10-2);
-  ctx.lineTo(24,10);ctx.lineTo(-24,10);ctx.closePath();ctx.fill();
-  // Ghost hood/head
-  ctx.fillStyle=`rgba(100,180,255,${alpha})`;
-  ctx.beginPath();ctx.ellipse(0,-26,15,19,0,0,Math.PI*2);ctx.fill();
-  // Empty eye sockets
-  for(const ex of[-6,6]){ctx.beginPath();ctx.arc(ex,-30,3.5,0,Math.PI*2);ctx.fillStyle=`rgba(5,15,50,${alpha+.3})`;ctx.fill();}
-  // Audio wave circles emanating from side
-  for(let r=0;r<3;r++){const ra=r*9+((t*2)%9);ctx.beginPath();ctx.arc(-20,-26,ra,-.9,.9);ctx.strokeStyle=`rgba(180,210,255,${(.65-r*.18)*alpha})`;ctx.lineWidth=1.3;ctx.stroke();}
-  // Trailing wisps
-  for(let i=0;i<3;i++){const wx=(i-1)*11,wy=8+Math.sin(t*.09+i)*7;ctx.beginPath();ctx.moveTo(wx,4);ctx.bezierCurveTo(wx+3,wy+6,wx-3,wy+11,wx,wy+18);ctx.strokeStyle=`rgba(68,136,255,${alpha*.5})`;ctx.lineWidth=5+i;ctx.stroke();}
-  // "🔊" sound icon — indicates audio challenge
-  ctx.fillStyle=`rgba(180,220,255,${alpha+.2})`;ctx.font="18px sans-serif";ctx.textAlign="center";ctx.fillText("🔊",0,-8);
+  // Blue translucent ghost - waveform body, no text (audio challenge)
+  ctx.save();ctx.translate(x,y);
+  const p=t*.04,alpha=.42+Math.sin(p*1.3)*.16;
+  // Outer soft glow
+  const gOut=ctx.createRadialGradient(0,-20,4,0,-20,50);
+  gOut.addColorStop(0,`rgba(68,136,255,${alpha*.6})`);gOut.addColorStop(1,"rgba(0,0,255,0)");
+  ctx.fillStyle=gOut;ctx.beginPath();ctx.arc(0,-20,50,0,Math.PI*2);ctx.fill();
+  // Waveform body (key feature - oscillating waves)
+  ctx.fillStyle=`rgba(68,136,255,${alpha})`;
+  ctx.beginPath();ctx.moveTo(-30,0);
+  for(let px=-30;px<=30;px+=2)ctx.lineTo(px,Math.sin((px*0.22+t*3))*13-2);
+  ctx.lineTo(30,16);ctx.lineTo(-30,16);ctx.closePath();ctx.fill();
+  // Ghost head - large hood
+  ctx.fillStyle=`rgba(88,160,255,${alpha+.1})`;
+  ctx.beginPath();ctx.ellipse(0,-28,18,24,0,0,Math.PI*2);ctx.fill();
+  // Dark eye hollows
+  [[-7,-32],[7,-32]].forEach(([ex,ey])=>{
+    ctx.fillStyle=`rgba(0,10,40,${alpha+.4})`;
+    ctx.beginPath();ctx.ellipse(ex,ey,5,6,0,0,Math.PI*2);ctx.fill();
+  });
+  // Audio wave rings from left side (like image)
+  for(let r=0;r<3;r++){
+    const ra=r*12+((t*2.5)%12);
+    ctx.beginPath();ctx.arc(-28,-28,ra,-1.1,1.1);
+    ctx.strokeStyle=`rgba(160,210,255,${(.7-r*.2)*alpha})`;
+    ctx.lineWidth=1.5;ctx.stroke();
+  }
+  // Bottom wisps
+  for(let i=0;i<3;i++){
+    const wx=(i-1)*14,wy=10+Math.sin(p*1.2+i)*8;
+    ctx.beginPath();ctx.moveTo(wx,12);
+    ctx.bezierCurveTo(wx+4,wy+10,wx-4,wy+18,wx+2,wy+28);
+    ctx.strokeStyle=`rgba(68,136,255,${alpha*.55})`;ctx.lineWidth=7-i*1.5;ctx.lineCap="round";ctx.stroke();
+  }
+  // Sound icon
+  ctx.font="22px sans-serif";ctx.textAlign="center";ctx.fillText("🔊",0,-8);
+  // Subtle shimmer lines on body
+  ctx.strokeStyle=`rgba(160,210,255,${alpha*.4})`;ctx.lineWidth=1;
+  for(let i=0;i<3;i++){
+    ctx.beginPath();
+    for(let px=-28;px<=28;px+=3)ctx.lineTo(px,Math.sin((px*.3+t*4+i*2))*5+4+i*4);
+    ctx.stroke();
+  }
   ctx.restore();
 }
 
-function drawLanguageChimera(ctx,x,y,englishWord,t){
-  // Three dragon heads: RED (text/english), YELLOW (grammar), BLUE (audio).
-  // English word on red head. NO translation anywhere.
-  ctx.save();ctx.translate(x,y);ctx.scale(1.1,1.1);
-  ctx.fillStyle="rgba(0,0,0,.32)";ctx.beginPath();ctx.ellipse(0,24,42,12,0,0,Math.PI*2);ctx.fill();
-  // Swirling aura text (abstract words, NOT the translation)
-  for(let i=0;i<7;i++){const a=t*.022+i*Math.PI*.286,r=44+Math.sin(t*.04+i)*5;ctx.fillStyle=`rgba(170,68,255,${.18+Math.sin(t*.05+i)*.08})`;ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText(["TRUTH","∅","FREE","語"][i%4],Math.cos(a)*r,Math.sin(a)*r*.65-6);}
+function drawLanguageChimera(ctx,x,y,word,t){
+  // Three dragon heads: RED(text/word), YELLOW(grammar), BLUE(audio)
+  ctx.save();ctx.translate(x,y);
+  const p=t*.035;
+  // Shadow
+  ctx.fillStyle="rgba(0,0,0,.4)";ctx.beginPath();ctx.ellipse(0,34,50,14,0,0,Math.PI*2);ctx.fill();
+  // Swirling text aura
+  const auraWords=["TRUTH","∅","自由","FREE","語","∅"];
+  for(let i=0;i<8;i++){
+    const a=p+i*Math.PI*.25,r=52+Math.sin(p*1.5+i)*6;
+    ctx.globalAlpha=.22+Math.sin(p+i)*.08;
+    ctx.fillStyle="#aa44ff";ctx.font="8px 'Share Tech Mono'";ctx.textAlign="center";
+    ctx.fillText(auraWords[i%auraWords.length],Math.cos(a)*r,Math.sin(a)*r*.6-4);
+  }
+  ctx.globalAlpha=1;
   // Central body
-  ctx.fillStyle="#550077aa";ctx.strokeStyle="#aa44ff";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,4,36,20,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-  // Three heads
-  const heads=[{dx:-27,c:"#cc2222",lc:"#ff5555",lbl:englishWord,role:"TEXT"},{dx:0,c:"#aa9900",lc:"#ffdd00",lbl:"???",role:"GRAM"},{dx:27,c:"#1144bb",lc:"#4488ff",lbl:"🔊",role:"AUDIO"}];
+  ctx.shadowBlur=14;ctx.shadowColor="#880099";
+  ctx.fillStyle="#660077bb";ctx.strokeStyle="#aa44ff";ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.ellipse(0,8,38,22,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.shadowBlur=0;
+  // Three dragon heads - each large and detailed
+  const heads=[
+    {dx:-30,col:"#cc2222",lc:"#ff5555",lbl:word,role:"TEXT"},
+    {dx:0,  col:"#aaaa00",lc:"#ffee00",lbl:"???",role:"GRAM"},
+    {dx:30, col:"#1133cc",lc:"#4488ff",lbl:"🔊",role:"AUDIO"},
+  ];
   heads.forEach(h=>{
-    const ht=Math.sin(t*.07+h.dx)*.8*3;
-    ctx.save();ctx.translate(h.dx,-28+ht);
-    // Dragon head
-    ctx.fillStyle=h.c+"cc";ctx.strokeStyle=h.lc;ctx.lineWidth=2;
-    ctx.beginPath();ctx.ellipse(0,0,14,17,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+    const ht=Math.sin(p+h.dx*.05)*4;
+    ctx.save();ctx.translate(h.dx,-30+ht);
+    // Neck
+    ctx.fillStyle=h.col+"99";ctx.beginPath();ctx.ellipse(0,14,8,12,0,0,Math.PI*2);ctx.fill();
+    // Head body
+    ctx.shadowBlur=12;ctx.shadowColor=h.col;
+    ctx.fillStyle=h.col+"cc";ctx.strokeStyle=h.lc;ctx.lineWidth=2;
+    ctx.beginPath();ctx.ellipse(0,0,16,20,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.shadowBlur=0;
     // Snout/jaw
-    ctx.fillStyle=h.c+"99";ctx.strokeStyle=h.lc;ctx.lineWidth=1;
-    ctx.beginPath();ctx.ellipse(0,10,9,6,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+    ctx.fillStyle=h.col+"99";ctx.strokeStyle=h.lc;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.ellipse(0,12,10,7,0,0,Math.PI*2);ctx.fill();ctx.stroke();
     // Teeth
-    ctx.fillStyle="#fff";for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-4+i*4,7);ctx.lineTo(-3+i*4,14);ctx.lineTo(-2+i*4,7);ctx.closePath();ctx.fill();}
-    // Eye
-    ctx.beginPath();ctx.arc(5,-5,4,0,Math.PI*2);ctx.fillStyle="#ffee00";ctx.fill();
-    ctx.beginPath();ctx.arc(5,-5,2,0,Math.PI*2);ctx.fillStyle="#000";ctx.fill();
-    // Horns
-    ctx.fillStyle=h.lc;for(const [hx,hy] of[[-5,-13],[5,-13]]){ctx.beginPath();ctx.moveTo(hx,hy);ctx.lineTo(hx-3,hy-10);ctx.lineTo(hx+3,hy-10);ctx.closePath();ctx.fill();}
-    // Label on head
-    ctx.fillStyle="#fff";ctx.font="bold 8px 'Share Tech Mono'";ctx.textAlign="center";
-    ctx.fillText(h.lbl.length>6?h.lbl.slice(0,6):h.lbl,0,0);
-    ctx.fillStyle=h.lc+"99";ctx.font="6px 'Share Tech Mono'";ctx.fillText(h.role,0,-20);
+    ctx.fillStyle="#eee";
+    for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(-6+i*4,9);ctx.lineTo(-5+i*4,17);ctx.lineTo(-3+i*4,9);ctx.closePath();ctx.fill();}
+    // Glowing eye
+    ctx.shadowBlur=8;ctx.shadowColor=h.lc;
+    ctx.fillStyle="#ffee00";ctx.beginPath();ctx.ellipse(5,-6,5,6,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#000";ctx.beginPath();ctx.ellipse(5,-6,2.5,4,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#fff";ctx.beginPath();ctx.ellipse(3,-8,1.5,1.5,0,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;
+    // Horns (two per head)
+    ctx.fillStyle=h.lc;
+    [[-6,-16],[6,-16]].forEach(([hx,hy])=>{ctx.beginPath();ctx.moveTo(hx,hy);ctx.lineTo(hx-4,hy-14);ctx.lineTo(hx+4,hy-14);ctx.closePath();ctx.fill();});
+    // Head scales texture
+    ctx.strokeStyle=h.col+"66";ctx.lineWidth=.8;
+    for(let s=0;s<3;s++){ctx.beginPath();ctx.arc(0,-s*6,8-s*2,Math.PI*.2,Math.PI*.8);ctx.stroke();}
+    // Label
+    ctx.shadowBlur=5;ctx.shadowColor="#000";
+    ctx.fillStyle="#fff";ctx.font="bold 9px 'Share Tech Mono'";ctx.textAlign="center";
+    ctx.fillText(typeof h.lbl==="string"&&h.lbl.length>6?h.lbl.slice(0,6):h.lbl,0,0);
+    ctx.fillStyle=h.lc+"cc";ctx.font="6px 'Share Tech Mono'";ctx.fillText(h.role,0,-24);
+    ctx.shadowBlur=0;
     ctx.restore();
   });
   ctx.restore();
@@ -644,116 +778,198 @@ function drawLanguageChimera(ctx,x,y,englishWord,t){
 // ── CHARACTER DRAW FUNCTIONS ──────────────────────────────────────────────────
 
 function drawInitiate(ctx,x,y,t,state){
-  // White/blue translucent mannequin silhouette (like image — NOT a stick figure)
-  // Smooth rounded body, orbiting symbols
-  ctx.save();ctx.translate(x,y);ctx.scale(1.5,1.5);
-  const bob=Math.sin(t*.12)*(state==="run"?2.5:1);
-  const col="#aabbdd";
-  // Glow aura
-  const g=ctx.createRadialGradient(0,-22,2,0,-22,22);g.addColorStop(0,"rgba(150,180,220,.5)");g.addColorStop(1,"transparent");ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,-22,22,0,Math.PI*2);ctx.fill();
-  // Head — smooth rounded circle
-  ctx.fillStyle="rgba(180,210,240,.7)";ctx.beginPath();ctx.ellipse(0,-44+bob,10,12,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
-  // Torso — smooth rounded rectangle (mannequin-like)
-  ctx.fillStyle="rgba(160,195,230,.5)";ctx.strokeStyle=col;ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.roundRect(-9,-33+bob,18,22,4);ctx.fill();ctx.stroke();
-  // Arms — smooth cylinders
-  const arm=Math.sin(t*.14)*(state==="run"?14:3);
-  for(const [ax,dir] of[[-9,1],[9,-1]]){
-    ctx.fillStyle="rgba(160,195,230,.4)";ctx.strokeStyle=col;ctx.lineWidth=1.2;
-    ctx.save();ctx.translate(ax,-28+bob);ctx.rotate(dir*arm*.035);
-    ctx.beginPath();ctx.roundRect(-4,0,8,18,3);ctx.fill();ctx.stroke();ctx.restore();
-  }
-  // Legs — smooth rounded
-  const leg=Math.sin(t*.14)*(state==="run"?13:2);
-  for(const [lx,dir] of[[-5,1],[5,-1]]){
-    ctx.fillStyle="rgba(150,185,220,.45)";ctx.strokeStyle=col;ctx.lineWidth=1.2;
-    ctx.save();ctx.translate(lx,-11+bob);ctx.rotate(dir*leg*.04);
-    ctx.beginPath();ctx.roundRect(-4,0,8,22,3);ctx.fill();ctx.stroke();ctx.restore();
-  }
-  // Data lines flowing down body (from image)
-  ctx.strokeStyle="rgba(100,160,220,.4)";ctx.lineWidth=.8;
-  for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(-7+i*3,-32+bob);ctx.lineTo(-7+i*3-1,-11+bob);ctx.stroke();}
-  // Orbiting symbols: a, 語, text, 字
+  // WHITE/BLUE translucent MANNEQUIN silhouette - smooth rounded body NOT stick figure
+  ctx.save();ctx.translate(x,y);
+  const bob=Math.sin(t*.12)*(state==="run"?3:1);
+  const col="#aabbdd",col2="#88aacc";
+  // Outer data aura glow
+  const aura=ctx.createRadialGradient(0,-30,5,0,-30,32);
+  aura.addColorStop(0,"rgba(140,180,230,.5)");aura.addColorStop(1,"rgba(80,120,200,0)");
+  ctx.fillStyle=aura;ctx.beginPath();ctx.arc(0,-30,32,0,Math.PI*2);ctx.fill();
+  // Head - smooth sphere
+  ctx.shadowBlur=10;ctx.shadowColor=col;
+  ctx.fillStyle="rgba(170,200,235,.75)";ctx.strokeStyle=col;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.ellipse(0,-52+bob,12,14,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  // Data lines on head
+  ctx.strokeStyle="rgba(120,170,220,.4)";ctx.lineWidth=.7;
+  for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(-8+i*4,-62+bob);ctx.lineTo(-7+i*4,-42+bob);ctx.stroke();}
+  // Neck
+  ctx.fillStyle="rgba(160,195,230,.6)";ctx.strokeStyle=col;ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect(-5,-39+bob,10,8,2);ctx.fill();ctx.stroke();
+  // Torso - smooth rounded mannequin body
+  ctx.fillStyle="rgba(155,190,228,.6)";ctx.strokeStyle=col;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.roundRect(-14,-32+bob,28,28,6);ctx.fill();ctx.stroke();
+  // Data flow lines on torso
+  ctx.strokeStyle="rgba(100,160,220,.35)";ctx.lineWidth=.8;
+  for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(-10+i*6,-30+bob);ctx.lineTo(-9+i*6,-6+bob);ctx.stroke();}
+  ctx.shadowBlur=0;
+  // Arms - smooth cylinders
+  const armAngle=Math.sin(t*.15)*(state==="run"?0.35:0.08);
+  [[-14,1],[14,-1]].forEach(([ax,dir])=>{
+    ctx.save();ctx.translate(ax,-24+bob);ctx.rotate(dir*armAngle);
+    ctx.fillStyle="rgba(148,184,224,.55)";ctx.strokeStyle=col2;ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.roundRect(-5,0,10,24,4);ctx.fill();ctx.stroke();
+    // Hand
+    ctx.fillStyle="rgba(160,200,235,.65)";ctx.beginPath();ctx.ellipse(0,26,6,5,0,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  });
+  // Legs - smooth cylinders
+  const legAngle=Math.sin(t*.15)*(state==="run"?0.4:0.06);
+  [[-7,1],[7,-1]].forEach(([lx,dir])=>{
+    ctx.save();ctx.translate(lx,-4+bob);ctx.rotate(dir*legAngle);
+    ctx.fillStyle="rgba(145,182,222,.55)";ctx.strokeStyle=col2;ctx.lineWidth=1.2;
+    ctx.beginPath();ctx.roundRect(-5,0,10,28,4);ctx.fill();ctx.stroke();
+    // Foot
+    ctx.fillStyle="rgba(158,195,232,.65)";ctx.beginPath();ctx.ellipse(0,30,7,4,0,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+  });
+  // Orbiting symbols: a, 語, text, 字 (from image)
   ["a","語","text","字"].forEach((s,i)=>{
-    if(Math.sin(t*.07+i*2)>-.15){const a=t*.04+i*Math.PI/2;ctx.fillStyle="rgba(150,200,240,"+(state==="error"?".3":".75")+")";ctx.font="9px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText(s,Math.cos(a)*20,Math.sin(a)*10-28+bob);}
+    const a=t*.04+i*Math.PI/2,r=28,vis=Math.sin(t*.07+i*2)>-.1;
+    if(vis){
+      ctx.fillStyle="rgba(160,210,255,.8)";ctx.font="10px 'Share Tech Mono'";ctx.textAlign="center";
+      ctx.fillText(s,Math.cos(a)*r,Math.sin(a)*r*.5-30+bob);
+    }
   });
   ctx.restore();
 }
 
 function drawDecoder(ctx,x,y,t,state){
-  // Full silver armored runner — helmet, chest with APPLE, gauntlets, boots
-  ctx.save();ctx.translate(x,y);ctx.scale(1.4,1.4);
-  const bob=Math.sin(t*.11)*(state==="run"?2:1);
-  const col="#88aabb",acc="#00f5c4";
+  // Full SILVER armor with helmet, APPLE chest, gauntlets, boots
+  ctx.save();ctx.translate(x,y);
+  const bob=Math.sin(t*.11)*(state==="run"?2.5:1);
+  const sil="#7799bb",lt="#aaccee",acc="#00f5c4";
   ctx.shadowBlur=8;ctx.shadowColor=acc;
-  // Boots
-  for(const bx of[-7,7]){ctx.fillStyle="#334455";ctx.beginPath();ctx.roundRect(bx-5,9+bob,10,8,2);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=1;ctx.stroke();}
-  // Shin guards
-  const leg=Math.sin(t*.14)*(state==="run"?11:2);
-  for(const [lx,ly] of[[-6,leg],[6,-leg]]){ctx.fillStyle="#445566aa";ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(lx-4,-14+bob+ly,8,14,2);ctx.fill();ctx.stroke();}
-  // Chest plate
-  ctx.fillStyle="#445566bb";ctx.strokeStyle="#88ccdd";ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-12,-37+bob,24,22,3);ctx.fill();ctx.stroke();
-  // APPLE label on chest (exact from image)
-  ctx.fillStyle="#ffdd00";ctx.font="bold 7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("APPLE",0,-26+bob);
+  // Shadow
+  ctx.fillStyle="rgba(0,0,0,.3)";ctx.beginPath();ctx.ellipse(0,38,20,7,0,0,Math.PI*2);ctx.fill();
+  // BOOTS
+  [[-10,0],[10,0]].forEach(([bx])=>{
+    ctx.fillStyle="#334455";ctx.beginPath();ctx.roundRect(bx-7,20+bob,14,10,3);ctx.fill();
+    ctx.strokeStyle=sil;ctx.lineWidth=1;ctx.stroke();
+  });
+  // LEG ARMOR
+  const legS=Math.sin(t*.14)*(state==="run"?14:2);
+  [[-9,legS],[9,-legS]].forEach(([lx,ls])=>{
+    ctx.fillStyle=sil+"99";ctx.strokeStyle=lt;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(lx-5,-2+bob+ls*.3,10,22,3);ctx.fill();ctx.stroke();
+  });
+  // CHEST PLATE
+  ctx.fillStyle=sil+"bb";ctx.strokeStyle=lt;ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.roundRect(-14,-30+bob,28,30,4);ctx.fill();ctx.stroke();
+  // APPLE label (exact from image)
+  ctx.fillStyle="#ffdd00";ctx.font="bold 8px 'Share Tech Mono'";ctx.textAlign="center";
+  ctx.fillText("APPLE",0,-15+bob);
+  // Chest detail lines
+  ctx.strokeStyle=lt+"66";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(-12,-28+bob);ctx.lineTo(12,-28+bob);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-12,-22+bob);ctx.lineTo(12,-22+bob);ctx.stroke();
   // Energy nodes
-  for(const [nx,ny] of[[-11,-36],[11,-36],[-11,-27],[11,-27]]){ctx.beginPath();ctx.arc(nx,ny+bob,2,0,Math.PI*2);ctx.fillStyle=acc;ctx.fill();}
-  // Shoulder pads
-  for(const sx of[-14,14]){ctx.fillStyle="#556677aa";ctx.beginPath();ctx.ellipse(sx,-37+bob,8,4.5,sx<0?-.35:.35,0,Math.PI*2);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();}
-  // Arm gauntlets
-  const arm=Math.sin(t*.14)*(state==="run"?11:2);
-  for(const [ax,ay] of[[-12,-15+arm*.4],[12,-15-arm*.4]]){ctx.fillStyle="#44556699";ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();ctx.roundRect(ax<0?ax-10:ax,ay+bob,10,16,2);ctx.fill();ctx.stroke();}
-  // Helmet — rounded with visor
-  ctx.fillStyle="#4a6077cc";ctx.strokeStyle="#88ccdd";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,-48+bob,13,15,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-  ctx.fillStyle="#2255aaaa";ctx.beginPath();ctx.ellipse(0,-48+bob,9,6,0,0,Math.PI*2);ctx.fill();
-  // Gauntlet glow
+  [[12,-28+bob],[-12,-28+bob],[12,-10+bob],[-12,-10+bob]].forEach(([nx,ny])=>{
+    ctx.shadowBlur=6;ctx.shadowColor=acc;
+    ctx.fillStyle=acc;ctx.beginPath();ctx.arc(nx,ny,3,0,Math.PI*2);ctx.fill();
+  });
+  ctx.shadowBlur=0;
+  // SHOULDER PADS
+  [[-16,-28+bob],[16,-28+bob]].forEach(([sx,sy])=>{
+    ctx.fillStyle=sil+"88";ctx.beginPath();ctx.ellipse(sx,sy,11,6.5,sx<0?-.38:.38,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=lt;ctx.lineWidth=1.5;ctx.stroke();
+  });
+  // ARM GAUNTLETS
+  const armS=Math.sin(t*.14)*(state==="run"?14:2);
+  [[-14,-2+bob+armS*.45],[14,-2+bob-armS*.45]].forEach(([ax,ay],i)=>{
+    ctx.fillStyle=sil+"77";ctx.strokeStyle=sil;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(i===0?ax-13:ax,ay,13,20,3);ctx.fill();ctx.stroke();
+    ctx.fillStyle="#445566";ctx.beginPath();ctx.ellipse(i===0?ax-6:ax+6,ay+20,7,5,0,0,Math.PI*2);ctx.fill();
+  });
+  // HELMET
+  ctx.shadowBlur=8;ctx.shadowColor=acc;
+  ctx.fillStyle=sil+"cc";ctx.strokeStyle=lt;ctx.lineWidth=2.5;
+  ctx.beginPath();ctx.ellipse(0,-46+bob,14,18,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  // Visor
+  ctx.fillStyle="#2255aa99";ctx.beginPath();ctx.ellipse(0,-46+bob,10,7,0,0,Math.PI*2);ctx.fill();
+  // Visor shine
+  ctx.fillStyle="rgba(180,220,255,.35)";ctx.beginPath();ctx.ellipse(-3,-50+bob,4,3,-.4,0,Math.PI*2);ctx.fill();
   ctx.shadowBlur=0;
   ctx.restore();
 }
 
 function drawSynthesizer(ctx,x,y,t,state){
-  // Heavy powered armor — glowing cyan, text streams (私は学校へ行きます) flowing off body
-  ctx.save();ctx.translate(x,y);ctx.scale(1.4,1.4);
-  const bob=Math.sin(t*.1)*(state==="run"?1.5:.8);
-  const col="#00f5c4";
-  ctx.shadowBlur=16;ctx.shadowColor=col;
-  // Power boots with glow
-  for(const bx of[-8,8]){ctx.fillStyle="#112233";ctx.beginPath();ctx.roundRect(bx-6,10+bob,12,9,2);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();const ge=ctx.createRadialGradient(bx,16+bob,0,bx,16+bob,7);ge.addColorStop(0,col+"66");ge.addColorStop(1,"transparent");ctx.fillStyle=ge;ctx.beginPath();ctx.arc(bx,16+bob,7,0,Math.PI*2);ctx.fill();}
-  // Heavy leg armor
-  const leg=Math.sin(t*.12)*(state==="run"?10:1.5);
-  for(const [lx,ly] of[[-7,leg],[7,-leg]]){ctx.fillStyle=col+"33";ctx.strokeStyle=col;ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(lx-5,-16+bob+ly,10,16,2);ctx.fill();ctx.stroke();}
-  // Heavy chest
-  ctx.fillStyle=col+"33";ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.roundRect(-14,-42+bob,28,26,4);ctx.fill();ctx.stroke();
-  // Text streams emanating from chest — 私は学校へ行きます (from image)
+  // Heavy CYAN powered armor, text streams flowing off body
+  ctx.save();ctx.translate(x,y);
+  const bob=Math.sin(t*.1)*(state==="run"?2:0.8);
+  const col="#00f5c4",dk="#009977",lt="#88ffee";
+  ctx.shadowBlur=18;ctx.shadowColor=col;
+  // Shadow
+  ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.ellipse(0,42,24,8,0,0,Math.PI*2);ctx.fill();
+  // POWER BOOTS with glow pads
+  [[-11,0],[11,0]].forEach(([bx])=>{
+    ctx.fillStyle="#112233";ctx.beginPath();ctx.roundRect(bx-8,24+bob,16,12,3);ctx.fill();
+    ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
+    const bg=ctx.createRadialGradient(bx,33+bob,0,bx,33+bob,9);
+    bg.addColorStop(0,col+"55");bg.addColorStop(1,"transparent");
+    ctx.fillStyle=bg;ctx.beginPath();ctx.arc(bx,33+bob,9,0,Math.PI*2);ctx.fill();
+  });
+  // HEAVY LEG ARMOR
+  const legS=Math.sin(t*.12)*(state==="run"?13:2);
+  [[-9,legS],[9,-legS]].forEach(([lx,ls])=>{
+    ctx.fillStyle=col+"33";ctx.strokeStyle=col;ctx.lineWidth=2;
+    ctx.beginPath();ctx.roundRect(lx-7,-4+bob+ls*.3,14,28,3);ctx.fill();ctx.stroke();
+  });
+  // HEAVY CHEST
+  ctx.fillStyle=col+"44";ctx.strokeStyle=col;ctx.lineWidth=3;
+  ctx.beginPath();ctx.roundRect(-17,-38+bob,34,32,5);ctx.fill();ctx.stroke();
+  // Text streams from chest - 私は学校へ行きます (exact from image)
   const stxt="私は学校へ行きます";
-  for(let i=0;i<8;i++){const a=t*.04+i*(Math.PI*2/8),r=22+Math.sin(t*.07+i)*4;ctx.fillStyle=col+Math.round((.3+Math.sin(t*.05+i)*.15)*255).toString(16).padStart(2,"0");ctx.font="8px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText(stxt[i%stxt.length],Math.cos(a)*r,Math.sin(a)*r*.7-30+bob);}
-  // Heavy shoulders
-  for(const sx of[-16,16]){ctx.fillStyle=col+"66";ctx.beginPath();ctx.ellipse(sx,-41+bob,10,5.5,sx<0?-.3:.3,0,Math.PI*2);ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();}
-  // Power arm cables
-  const arm=Math.sin(t*.12)*(state==="run"?10.5:2);
-  for(const [ax,ay] of[[-14,-15+arm*.4],[14,-15-arm*.4]]){ctx.fillStyle=col+"44";ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.roundRect(ax<0?ax-12:ax,ay+bob,12,19,2);ctx.fill();ctx.stroke();}
-  // Advanced helmet with full visor
-  ctx.fillStyle=col+"44";ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,-54+bob,14,16,0,0,Math.PI*2);ctx.fill();ctx.stroke();
-  ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(0,-54+bob,10,7,0,0,Math.PI*2);ctx.fill();
+  for(let i=0;i<9;i++){
+    const a=t*.038+i*(Math.PI*2/9),r=26+Math.sin(t*.07+i)*5;
+    const al=.35+Math.abs(Math.sin(t*.05+i))*.35;
+    ctx.globalAlpha=al;
+    ctx.fillStyle=col;ctx.font="9px 'Share Tech Mono'";ctx.textAlign="center";
+    ctx.fillText(stxt[i%stxt.length],Math.cos(a)*r,Math.sin(a)*r*.65-24+bob);
+  }
+  ctx.globalAlpha=1;
+  // HEAVY SHOULDERS
+  [[-19,-36+bob],[19,-36+bob]].forEach(([sx,sy])=>{
+    ctx.fillStyle=col+"66";ctx.beginPath();ctx.ellipse(sx,sy,12,7,sx<0?-.3:.3,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();
+  });
+  // POWER ARM CABLES
+  const armS=Math.sin(t*.12)*(state==="run"?13:2);
+  [[-17,-6+bob+armS*.45],[17,-6+bob-armS*.45]].forEach(([ax,ay],i)=>{
+    ctx.fillStyle=col+"44";ctx.strokeStyle=col;ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.roundRect(i===0?ax-14:ax,ay,14,24,3);ctx.fill();ctx.stroke();
+    // Gauntlet glow
+    ctx.shadowBlur=10;ctx.shadowColor=col;
+    ctx.fillStyle=col+"55";ctx.beginPath();ctx.ellipse(i===0?ax-7:ax+7,ay+24,9,6,0,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;
+  });
+  // ADVANCED HELMET
+  ctx.fillStyle=col+"55";ctx.strokeStyle=col;ctx.lineWidth=3;
+  ctx.beginPath();ctx.ellipse(0,-56+bob,16,20,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+  ctx.fillStyle=col+"aa";ctx.beginPath();ctx.ellipse(0,-56+bob,11,8,0,0,Math.PI*2);ctx.fill();
   ctx.shadowBlur=0;
   ctx.restore();
 }
 
 function drawFluentEntity(ctx,x,y,t,state){
-  // Abstract form — entire body made of language characters
-  ctx.save();ctx.translate(x,y);ctx.scale(1.4,1.4);
-  ctx.shadowBlur=24;ctx.shadowColor="#ff8800";
-  const chars="私学APPLE語ABCDEFGHIJKLMNOPQRSTUVWXYZαβγδ字文TRUTH自由";
-  for(let i=0;i<36;i++){
-    const a=(i/36)*Math.PI*2+t*.021,r=14+Math.sin(t*.055+i*.5)*7;
-    const al=.25+Math.abs(Math.sin(t*.052+i))*.55;
-    ctx.fillStyle="#ff8800"+Math.round(al*255).toString(16).padStart(2,"0");
-    ctx.font=`${8+Math.random()*5}px 'Share Tech Mono'`;ctx.textAlign="center";
-    ctx.fillText(chars[i%chars.length],Math.cos(a)*r,Math.sin(a)*r*.65-22);
+  // Abstract form - body entirely made of language characters
+  ctx.save();ctx.translate(x,y);
+  ctx.shadowBlur=26;ctx.shadowColor="#ff8800";
+  const chars="私学APPLE語ABCDEFGHIJKLMNOPQRSTUVWXYZαβγ字文TRUTH自由∞";
+  for(let i=0;i<40;i++){
+    const a=(i/40)*Math.PI*2+t*.02;
+    const r=16+Math.sin(t*.054+i*.48)*8;
+    const al=.22+Math.abs(Math.sin(t*.05+i))*.6;
+    ctx.globalAlpha=al;
+    ctx.fillStyle="#ff8800";
+    ctx.font=`${9+Math.sin(i)*3}px 'Share Tech Mono'`;ctx.textAlign="center";
+    ctx.fillText(chars[i%chars.length],Math.cos(a)*r,Math.sin(a)*r*.65-26);
   }
-  // Core pulse
-  const gc=ctx.createRadialGradient(0,-22,0,0,-22,18);gc.addColorStop(0,"rgba(255,136,0,.85)");gc.addColorStop(1,"transparent");
-  ctx.fillStyle=gc;ctx.beginPath();ctx.arc(0,-22,18,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=1;
+  // Core bright center
+  const gc=ctx.createRadialGradient(0,-26,0,0,-26,20);
+  gc.addColorStop(0,"rgba(255,180,0,.9)");gc.addColorStop(.5,"rgba(255,100,0,.5)");gc.addColorStop(1,"transparent");
+  ctx.fillStyle=gc;ctx.beginPath();ctx.arc(0,-26,20,0,Math.PI*2);ctx.fill();
   ctx.shadowBlur=0;
   ctx.restore();
 }
@@ -762,81 +978,116 @@ function drawFluentEntity(ctx,x,y,t,state){
 
 function drawForestTile(ctx,cx,cy,tw,th,decor,t,isWall){
   if(isWall){
-    isoBlock(ctx,cx,cy,tw,th,th*1.4,"#1c5515","#0e2a0a","#162410");
-    // Tree ON TOP of wall block - grows upward from tile center
-    const ty=cy-th*.5;
-    ctx.fillStyle="#0d2a08";ctx.beginPath();ctx.moveTo(cx,ty-8);ctx.lineTo(cx-10,ty+18);ctx.lineTo(cx+10,ty+18);ctx.closePath();ctx.fill();
-    ctx.fillStyle="#1a4a10";ctx.beginPath();ctx.moveTo(cx,ty-16);ctx.lineTo(cx-7,ty+4);ctx.lineTo(cx+7,ty+4);ctx.closePath();ctx.fill();
-    ctx.fillStyle="#225a14";ctx.beginPath();ctx.moveTo(cx,ty-24);ctx.lineTo(cx-5,ty-6);ctx.lineTo(cx+5,ty-6);ctx.closePath();ctx.fill();
+    // Wall block with tree growing UP from top
+    isoBlock(ctx,cx,cy,tw,th,th*1.5,"#1c5a14","#0d2a08","#152210");
+    // Tree grows UPWARD from the top of the block
+    const tx=cx,ty=cy-th*.5;
+    ctx.fillStyle="#0a2008";ctx.beginPath();ctx.moveTo(tx,ty+4);ctx.lineTo(tx-13,ty-22);ctx.lineTo(tx+13,ty-22);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#163810";ctx.beginPath();ctx.moveTo(tx,ty-6);ctx.lineTo(tx-10,ty-26);ctx.lineTo(tx+10,ty-26);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#1e5018";ctx.beginPath();ctx.moveTo(tx,ty-16);ctx.lineTo(tx-7,ty-30);ctx.lineTo(tx+7,ty-30);ctx.closePath();ctx.fill();
+    // Noun label
+    ctx.fillStyle="rgba(0,255,80,.55)";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";
+    ctx.fillText("noun",tx,ty-34);
     return;
   }
-  isoBlock(ctx,cx,cy,tw,th,0,"#1a4415","#0e2a0a","#12300c");
-  if(decor>.78){
-    // Word platform label on floor
-    ctx.fillStyle="rgba(0,255,68,.35)";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("noun",cx,cy+th*.6);
-  } else if(decor>.55){
-    ctx.fillStyle="rgba(0,200,80,.3)";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("verb",cx,cy+th*.6);
-  }
+  // Floor tile - green with texture
+  isoBlock(ctx,cx,cy,tw,th,0,"#1a4414","#0e2a08","#122c0c");
+  // Grass dots
+  ctx.fillStyle="rgba(30,120,20,.2)";
+  ctx.beginPath();ctx.ellipse(cx-tw*.15,cy+th*.4,tw*.1,th*.08,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(cx+tw*.1,cy+th*.55,tw*.08,th*.06,-.3,0,Math.PI*2);ctx.fill();
+  // Word label on non-wall floor tiles
+  if(decor>.78){ctx.fillStyle="rgba(0,200,80,.4)";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("noun",cx,cy+th*.62);}
+  else if(decor>.55){ctx.fillStyle="rgba(0,180,60,.35)";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("verb",cx,cy+th*.62);}
 }
 
 function drawFactoryTile(ctx,cx,cy,tw,th,decor,t,isWall){
-  if(isWall){isoBlock(ctx,cx,cy,tw,th,th*1.4,"#4a2e00","#261800","#362000");return;}
-  // Conveyor pattern (animated stripes like image)
+  if(isWall){
+    isoBlock(ctx,cx,cy,tw,th,th*1.5,"#4a2e00","#261800","#362000");
+    // Chimney pipe on top
+    ctx.fillStyle="#331a00";ctx.fillRect(cx-4,cy-th*.6,8,th*.6);
+    ctx.fillStyle="#442200";ctx.beginPath();ctx.ellipse(cx,cy-th*.6,8,4,0,0,Math.PI*2);ctx.fill();
+    // Smoke puff
+    ctx.fillStyle=`rgba(80,60,30,${.3+Math.sin(t*.05)*.1})`;
+    ctx.beginPath();ctx.arc(cx,cy-th*.6-10-(t%20),8+t%8,0,Math.PI*2);ctx.fill();
+    return;
+  }
   isoBlock(ctx,cx,cy,tw,th,0,"#3a2200","#201200","#2a1800");
-  const off=(t*.7)%14;
-  ctx.fillStyle="rgba(90,55,0,.55)";
-  for(let s=0;s<5;s++){const bx=cx-tw*.4+s*13+off-6;ctx.beginPath();ctx.moveTo(bx,cy+th*.45);ctx.lineTo(bx+7,cy+th*.92);ctx.lineTo(bx+9,cy+th*.92);ctx.lineTo(bx+2,cy+th*.45);ctx.closePath();ctx.fill();}
-  if(decor>.72){
-    // Colored word block (SVO blocks from image: green verb, red incorrect)
+  // Animated conveyor stripes
+  const off=(t*.8)%16;
+  ctx.fillStyle="rgba(100,65,0,.5)";
+  for(let s=0;s<5;s++){
+    const bx=cx-tw*.4+s*14+off-8;
+    ctx.beginPath();ctx.moveTo(bx,cy+th*.42);ctx.lineTo(bx+8,cy+th*.88);
+    ctx.lineTo(bx+10,cy+th*.88);ctx.lineTo(bx+2,cy+th*.42);ctx.closePath();ctx.fill();
+  }
+  // Word block
+  if(decor>.7){
     const bc=["#ff444466","#44ff4466","#4444ff66","#ffaa0066"][0|decor*4%4];
-    ctx.fillStyle=bc;ctx.beginPath();ctx.roundRect(cx-14,cy+th*.28-8,28,14,2);ctx.fill();
-    ctx.strokeStyle="rgba(255,200,0,.55)";ctx.lineWidth=1;ctx.stroke();
-    ctx.fillStyle="#fff";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";
-    ctx.fillText(["S-V-O","CORRER","HABLAR","VERB"][0|decor*4%4],cx,cy+th*.28+2);
+    const lbl=["S-V-O","VERB","NOUN","ADJ"][0|decor*4%4];
+    ctx.fillStyle=bc;ctx.beginPath();ctx.roundRect(cx-16,cy+th*.25-8,32,16,2);ctx.fill();
+    ctx.strokeStyle="rgba(255,200,0,.6)";ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle="#fff";ctx.font="8px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText(lbl,cx,cy+th*.25+4);
   }
 }
 
 function drawCavernTile(ctx,cx,cy,tw,th,decor,t,isWall){
   if(isWall){
-    // Dark stalactite-style wall
-    isoBlock(ctx,cx,cy,tw,th,th*1.5,"#001530","#000a1a","#001025");
+    isoBlock(ctx,cx,cy,tw,th,th*1.6,"#001530","#000a1a","#001025");
+    // Stalactite hanging down from wall top
+    const sx=cx,sy=cy-th*.4;
+    ctx.fillStyle="#001a38";ctx.beginPath();ctx.moveTo(sx-7,sy);ctx.lineTo(sx,sy+20);ctx.lineTo(sx+7,sy);ctx.closePath();ctx.fill();
     // Crystal on wall
-    ctx.save();ctx.shadowBlur=12;ctx.shadowColor="#4488ff";
-    ctx.fillStyle="rgba(68,136,255,.55)";ctx.beginPath();ctx.moveTo(cx,cy-5);ctx.lineTo(cx-5,cy+7);ctx.lineTo(cx+5,cy+7);ctx.closePath();ctx.fill();ctx.restore();
+    ctx.shadowBlur=10;ctx.shadowColor="#4488ff";
+    ctx.fillStyle="rgba(68,136,255,.65)";
+    ctx.beginPath();ctx.moveTo(sx,sy-5);ctx.lineTo(sx-5,sy+8);ctx.lineTo(sx+5,sy+8);ctx.closePath();ctx.fill();
+    ctx.shadowBlur=0;
     return;
   }
   isoBlock(ctx,cx,cy,tw,th,0,"#001228","#00081a","#000e22");
   if(decor>.72){
-    // Glowing crystal cluster
-    ctx.save();ctx.shadowBlur=14+Math.sin(t*.06)*5;ctx.shadowColor="#4488ff";
-    ctx.fillStyle="rgba(68,136,255,.65)";
-    ctx.beginPath();ctx.moveTo(cx,cy+th*.2);ctx.lineTo(cx-5,cy+th*.62);ctx.lineTo(cx+5,cy+th*.62);ctx.closePath();ctx.fill();
-    ctx.fillStyle="rgba(100,180,255,.4)";
-    ctx.beginPath();ctx.moveTo(cx+6,cy+th*.3);ctx.lineTo(cx+2,cy+th*.65);ctx.lineTo(cx+10,cy+th*.65);ctx.closePath();ctx.fill();
-    ctx.restore();
+    // Crystal cluster glowing
+    ctx.shadowBlur=16+Math.sin(t*.055)*6;ctx.shadowColor="#4488ff";
+    ctx.fillStyle="rgba(68,136,255,.7)";
+    ctx.beginPath();ctx.moveTo(cx,cy+th*.15);ctx.lineTo(cx-6,cy+th*.65);ctx.lineTo(cx+6,cy+th*.65);ctx.closePath();ctx.fill();
+    ctx.fillStyle="rgba(100,180,255,.5)";
+    ctx.beginPath();ctx.moveTo(cx+8,cy+th*.25);ctx.lineTo(cx+3,cy+th*.68);ctx.lineTo(cx+13,cy+th*.68);ctx.closePath();ctx.fill();
+    ctx.shadowBlur=0;
   } else {
-    // Sound wave pulse on floor
-    ctx.strokeStyle=`rgba(68,136,255,${.1+Math.sin(t*.04+decor*10)*.07})`;ctx.lineWidth=1;
-    ctx.beginPath();for(let px=cx-tw*.35;px<=cx+tw*.35;px+=2){const yy=cy+th*.65+Math.sin((px+t*2)*.18)*6;px===Math.ceil(cx-tw*.35)?ctx.moveTo(px,yy):ctx.lineTo(px,yy);}ctx.stroke();
+    // Sound wave pulse
+    const wAlpha=.12+Math.sin(t*.04+decor*8)*.07;
+    ctx.strokeStyle=`rgba(68,136,255,${wAlpha})`;ctx.lineWidth=1;ctx.beginPath();
+    for(let px=cx-tw*.38;px<=cx+tw*.38;px+=2){
+      const yy=cy+th*.62+Math.sin((px+t*2.5)*.2)*7;
+      px===Math.ceil(cx-tw*.38)?ctx.moveTo(px,yy):ctx.lineTo(px,yy);
+    }
+    ctx.stroke();
   }
 }
 
 function drawGlitchTile(ctx,cx,cy,tw,th,decor,t,isWall){
-  if(isWall){isoBlock(ctx,cx,cy,tw,th,th*1.3,"#330045","#1a0025","#280038");return;}
+  if(isWall){
+    isoBlock(ctx,cx,cy,tw,th,th*1.4,"#2d0042","#180025","#220035");
+    // Glitch artifact on wall
+    if(Math.random()>.96){ctx.fillStyle="#ff00ff33";ctx.fillRect(cx-10,cy-th*.3,20,4);}
+    return;
+  }
   isoBlock(ctx,cx,cy,tw,th,0,"#1e0030","#100020","#180028");
-  if(Math.random()>.97){ctx.fillStyle="rgba(255,0,255,.12)";ctx.fillRect(cx-tw*.4,cy,tw*.8,4+Math.random()*5);}
+  // Random glitch flash
+  if(Math.random()>.97){ctx.fillStyle="rgba(255,0,255,.14)";ctx.fillRect(cx-tw*.4,cy,tw*.8,5+Math.random()*6);}
   if(decor>.72){
     // Data cluster
-    ctx.fillStyle="rgba(170,68,255,.22)";ctx.beginPath();ctx.roundRect(cx-18,cy+th*.22,36,14,2);ctx.fill();
-    ctx.strokeStyle="rgba(170,68,255,.44)";ctx.lineWidth=1;ctx.stroke();
-    ctx.fillStyle="#aa44ff";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";
-    ctx.fillText(["TRUTH","∅","FREE","???"][0|decor*4%4],cx,cy+th*.22+10);
+    ctx.fillStyle="rgba(170,68,255,.28)";ctx.beginPath();ctx.roundRect(cx-19,cy+th*.22,38,16,2);ctx.fill();
+    ctx.strokeStyle="rgba(170,68,255,.5)";ctx.lineWidth=1;ctx.stroke();
+    ctx.fillStyle="#cc88ff";ctx.font="8px 'Share Tech Mono'";ctx.textAlign="center";
+    ctx.fillText(["TRUTH","∅","FREE","???"][0|decor*4%4],cx,cy+th*.22+11);
   }
-  // Racetrack lines (from image — Glitch Racetrack)
-  ctx.strokeStyle="rgba(255,50,255,.08)";ctx.lineWidth=1;ctx.setLineDash([4,4]);
+  // Racetrack lines
+  ctx.strokeStyle="rgba(255,50,255,.07)";ctx.lineWidth=1;ctx.setLineDash([5,5]);
   ctx.beginPath();ctx.moveTo(cx-tw*.4,cy+th*.55);ctx.lineTo(cx+tw*.4,cy+th*.55);ctx.stroke();
   ctx.setLineDash([]);
 }
+
 
 // ═══════════════════════════════════════
 //  GAME ENGINE
