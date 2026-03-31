@@ -489,7 +489,7 @@ function drawWordSlime(ctx,x,y,englishWord,t){
   // Drop shadow
   ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.ellipse(0,18,32,10,0,0,Math.PI*2);ctx.fill();
   // Main blob body — lumpy amorphous shape like image
-  const w=t*.06,sz=34;
+  const w=t*.06,sz=20;
   ctx.fillStyle="#cc2200";
   ctx.beginPath();
   ctx.moveTo(0,-sz*.7+Math.sin(w)*2);
@@ -519,7 +519,7 @@ function drawWordSlime(ctx,x,y,englishWord,t){
 function drawFalseTwin(ctx,x,y,englishWord,t){
   // Two orange lizard/dragon heads. Shows only English word on body. 
   // One head shows "???" to indicate ambiguity. NO translation shown.
-  ctx.save();ctx.translate(x,y);
+  ctx.save();ctx.translate(x,y);ctx.scale(1.2,1.2);
   ctx.fillStyle="rgba(0,0,0,.3)";ctx.beginPath();ctx.ellipse(0,16,30,8,0,0,Math.PI*2);ctx.fill();
   // Draw two heads
   [[-20,-.15],[20,.15]].forEach(([dx,tilt],idx)=>{
@@ -552,7 +552,7 @@ function drawSentenceKnight(ctx,x,y,englishWord,t){
   // Full armored figure with labeled body parts. English word on torso plate.
   // NO translation anywhere.
   const col="#ddaa44",dk="#886622",lt="#eeccaa";
-  ctx.save();ctx.translate(x,y);
+  ctx.save();ctx.translate(x,y);ctx.scale(1.3,1.3);
   const bob=Math.sin(t*.07)*2;
   ctx.fillStyle="rgba(0,0,0,.28)";ctx.beginPath();ctx.ellipse(0,24,18,6,0,0,Math.PI*2);ctx.fill();
   // Greaves
@@ -580,7 +580,7 @@ function drawSentenceKnight(ctx,x,y,englishWord,t){
 function drawEchoWraith(ctx,x,y,t){
   // Translucent blue ghost with waveform body. Shows sound icon. NO english word, NO translation.
   // The English word is shown in the ninja-q-word label above.
-  ctx.save();ctx.translate(x,y);
+  ctx.save();ctx.translate(x,y);ctx.scale(1.3,1.3);
   const alpha=.38+Math.sin(t*.05)*.14;
   // Outer glow
   const grd=ctx.createRadialGradient(0,-14,2,0,-14,38);
@@ -608,7 +608,7 @@ function drawEchoWraith(ctx,x,y,t){
 function drawLanguageChimera(ctx,x,y,englishWord,t){
   // Three dragon heads: RED (text/english), YELLOW (grammar), BLUE (audio).
   // English word on red head. NO translation anywhere.
-  ctx.save();ctx.translate(x,y);
+  ctx.save();ctx.translate(x,y);ctx.scale(1.1,1.1);
   ctx.fillStyle="rgba(0,0,0,.32)";ctx.beginPath();ctx.ellipse(0,24,42,12,0,0,Math.PI*2);ctx.fill();
   // Swirling aura text (abstract words, NOT the translation)
   for(let i=0;i<7;i++){const a=t*.022+i*Math.PI*.286,r=44+Math.sin(t*.04+i)*5;ctx.fillStyle=`rgba(170,68,255,${.18+Math.sin(t*.05+i)*.08})`;ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText(["TRUTH","∅","FREE","語"][i%4],Math.cos(a)*r,Math.sin(a)*r*.65-6);}
@@ -646,7 +646,7 @@ function drawLanguageChimera(ctx,x,y,englishWord,t){
 function drawInitiate(ctx,x,y,t,state){
   // White/blue translucent mannequin silhouette (like image — NOT a stick figure)
   // Smooth rounded body, orbiting symbols
-  ctx.save();ctx.translate(x,y);
+  ctx.save();ctx.translate(x,y);ctx.scale(1.5,1.5);
   const bob=Math.sin(t*.12)*(state==="run"?2.5:1);
   const col="#aabbdd";
   // Glow aura
@@ -683,7 +683,7 @@ function drawInitiate(ctx,x,y,t,state){
 
 function drawDecoder(ctx,x,y,t,state){
   // Full silver armored runner — helmet, chest with APPLE, gauntlets, boots
-  ctx.save();ctx.translate(x,y);
+  ctx.save();ctx.translate(x,y);ctx.scale(1.4,1.4);
   const bob=Math.sin(t*.11)*(state==="run"?2:1);
   const col="#88aabb",acc="#00f5c4";
   ctx.shadowBlur=8;ctx.shadowColor=acc;
@@ -713,7 +713,7 @@ function drawDecoder(ctx,x,y,t,state){
 
 function drawSynthesizer(ctx,x,y,t,state){
   // Heavy powered armor — glowing cyan, text streams (私は学校へ行きます) flowing off body
-  ctx.save();ctx.translate(x,y);
+  ctx.save();ctx.translate(x,y);ctx.scale(1.4,1.4);
   const bob=Math.sin(t*.1)*(state==="run"?1.5:.8);
   const col="#00f5c4";
   ctx.shadowBlur=16;ctx.shadowColor=col;
@@ -741,7 +741,7 @@ function drawSynthesizer(ctx,x,y,t,state){
 
 function drawFluentEntity(ctx,x,y,t,state){
   // Abstract form — entire body made of language characters
-  ctx.save();ctx.translate(x,y);
+  ctx.save();ctx.translate(x,y);ctx.scale(1.4,1.4);
   ctx.shadowBlur=24;ctx.shadowColor="#ff8800";
   const chars="私学APPLE語ABCDEFGHIJKLMNOPQRSTUVWXYZαβγδ字文TRUTH自由";
   for(let i=0;i<36;i++){
@@ -761,21 +761,21 @@ function drawFluentEntity(ctx,x,y,t,state){
 // ── BIOME TILE DRAWING ────────────────────────────────────────────────────────
 
 function drawForestTile(ctx,cx,cy,tw,th,decor,t,isWall){
-  if(isWall){isoBlock(ctx,cx,cy,tw,th,th*1.3,"#1c5515","#0e2a0a","#162410");return;}
+  if(isWall){
+    isoBlock(ctx,cx,cy,tw,th,th*1.4,"#1c5515","#0e2a0a","#162410");
+    // Tree ON TOP of wall block - grows upward from tile center
+    const ty=cy-th*.5;
+    ctx.fillStyle="#0d2a08";ctx.beginPath();ctx.moveTo(cx,ty-8);ctx.lineTo(cx-10,ty+18);ctx.lineTo(cx+10,ty+18);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#1a4a10";ctx.beginPath();ctx.moveTo(cx,ty-16);ctx.lineTo(cx-7,ty+4);ctx.lineTo(cx+7,ty+4);ctx.closePath();ctx.fill();
+    ctx.fillStyle="#225a14";ctx.beginPath();ctx.moveTo(cx,ty-24);ctx.lineTo(cx-5,ty-6);ctx.lineTo(cx+5,ty-6);ctx.closePath();ctx.fill();
+    return;
+  }
   isoBlock(ctx,cx,cy,tw,th,0,"#1a4415","#0e2a0a","#12300c");
-  // Grass texture
-  ctx.fillStyle="rgba(30,100,20,.25)";ctx.beginPath();ctx.ellipse(cx-tw*.12,cy+th*.45,tw*.15,th*.12,0,0,Math.PI*2);ctx.fill();
   if(decor>.78){
-    // Tree — proper conical shape like image
-    ctx.fillStyle="#0a1e08";ctx.beginPath();ctx.moveTo(cx,cy+th*.08);ctx.lineTo(cx-11,cy+th*.08-28);ctx.lineTo(cx+11,cy+th*.08-28);ctx.closePath();ctx.fill();
-    ctx.fillStyle="#142e0e";ctx.beginPath();ctx.moveTo(cx,cy+th*.08-8);ctx.lineTo(cx-8,cy+th*.08-30);ctx.lineTo(cx+8,cy+th*.08-30);ctx.closePath();ctx.fill();
-    ctx.fillStyle="#1a4010";ctx.beginPath();ctx.moveTo(cx,cy+th*.08-16);ctx.lineTo(cx-6,cy+th*.08-32);ctx.lineTo(cx+6,cy+th*.08-32);ctx.closePath();ctx.fill();
-    ctx.fillStyle="rgba(0,255,68,.45)";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("noun",cx,cy+th*.08-35);
+    // Word platform label on floor
+    ctx.fillStyle="rgba(0,255,68,.35)";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("noun",cx,cy+th*.6);
   } else if(decor>.55){
-    // Stone platform = verb
-    ctx.fillStyle="#2a5a1a";ctx.beginPath();ctx.roundRect(cx-18,cy+th*.65-6,36,9,2);ctx.fill();
-    ctx.strokeStyle="#3a7a22";ctx.lineWidth=1;ctx.stroke();
-    ctx.fillStyle="#00ff66";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("verb",cx,cy+th*.65+1);
+    ctx.fillStyle="rgba(0,200,80,.3)";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText("verb",cx,cy+th*.6);
   }
 }
 
@@ -990,7 +990,7 @@ const G={
     for(let y=0;y<H;y+=3){ctx.fillStyle="rgba(0,0,0,.025)";ctx.fillRect(0,y,W,1);}
     // Camera center on player
     const ps=isoXY(this.pGX,this.pGY,this.TW,this.TH);
-    this.camX=W*.38-ps.x;this.camY=H*.36-ps.y;
+    this.camX=W*.5-ps.x;this.camY=H*.32-ps.y;
     ctx.save();ctx.translate(this.camX,this.camY);
     // Painter sort all objects
     const todo=[];
