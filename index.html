@@ -478,6 +478,18 @@ function isoBlock(ctx,x,y,tw,th,bh,topC,leftC,rightC){
   }
 }
 
+
+// Polyfill for roundRect (not supported in all browsers)
+function rr(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);ctx.arc(x+w-r,y+r,r,-Math.PI/2,0);
+  ctx.lineTo(x+w,y+h-r);ctx.arc(x+w-r,y+h-r,r,0,Math.PI/2);
+  ctx.lineTo(x+r,y+h);ctx.arc(x+r,y+h-r,r,Math.PI/2,Math.PI);
+  ctx.lineTo(x,y+r);ctx.arc(x+r,y+r,r,Math.PI,Math.PI*1.5);
+  ctx.closePath();
+}
+
 // ── ENEMY DRAW FUNCTIONS ─────────────────────────────────────────────────────
 // Enemies NEVER show the translation - only English word + visual design
 // All enemies drawn large (60-80px tall) to be clearly visible
@@ -609,22 +621,22 @@ function drawSentenceKnight(ctx,x,y,word,t){
   ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.ellipse(0,36,22,8,0,0,Math.PI*2);ctx.fill();
   // BOOTS
   [[-10,0],[10,0]].forEach(([bx])=>{
-    ctx.fillStyle=dkGold;ctx.beginPath();ctx.roundRect(bx-7,18+bob,14,12,3);ctx.fill();
+    ctx.fillStyle=dkGold;rr(ctx,bx-7,18+bob,14,12,3);ctx.fill();
     ctx.strokeStyle=gold;ctx.lineWidth=1;ctx.stroke();
   });
   // LEGS (object plates)
   const legSwing=Math.sin(t*.1)*8;
   ctx.fillStyle=gold+"aa";ctx.strokeStyle=gold;ctx.lineWidth=2;
-  ctx.beginPath();ctx.roundRect(-16,2+bob+legSwing,13,18,3);ctx.fill();ctx.stroke();
+  rr(ctx,-16,2+bob+legSwing,13,18,3);ctx.fill();ctx.stroke();
   ctx.fillStyle=gold;ctx.font="bold 7px 'Share Tech Mono'";ctx.textAlign="center";
   ctx.fillText("obj",-9,12+bob+legSwing);
   ctx.fillStyle=gold+"aa";ctx.strokeStyle=gold;
-  ctx.beginPath();ctx.roundRect(3,2+bob-legSwing,13,18,3);ctx.fill();ctx.stroke();
+  rr(ctx,3,2+bob-legSwing,13,18,3);ctx.fill();ctx.stroke();
   ctx.fillStyle=gold;ctx.fillText("obj",10,12+bob-legSwing);
   // TORSO - main armor plate with word
   ctx.shadowBlur=8;ctx.shadowColor=gold;
   ctx.fillStyle=gold+"cc";ctx.strokeStyle=ltGold;ctx.lineWidth=2.5;
-  ctx.beginPath();ctx.roundRect(-16,-22+bob,32,26,4);ctx.fill();ctx.stroke();
+  rr(ctx,-16,-22+bob,32,26,4);ctx.fill();ctx.stroke();
   // Verb plate label
   ctx.fillStyle="#fff";ctx.font="bold 9px 'Share Tech Mono'";ctx.textAlign="center";
   ctx.fillText(word.slice(0,8),0,-9+bob);
@@ -637,10 +649,10 @@ function drawSentenceKnight(ctx,x,y,word,t){
   });
   // ARMS with gauntlets
   ctx.fillStyle=gold+"88";ctx.strokeStyle=gold;ctx.lineWidth=2;
-  ctx.beginPath();ctx.roundRect(-32,-16+bob+arm*.5,12,22,3);ctx.fill();ctx.stroke();
+  rr(ctx,-32,-16+bob+arm*.5,12,22,3);ctx.fill();ctx.stroke();
   ctx.fillStyle=dkGold;ctx.beginPath();ctx.ellipse(-26,-16+bob+arm*.5+22,7,5,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle=gold+"88";ctx.strokeStyle=gold;
-  ctx.beginPath();ctx.roundRect(20,-16+bob-arm*.5,12,22,3);ctx.fill();ctx.stroke();
+  rr(ctx,20,-16+bob-arm*.5,12,22,3);ctx.fill();ctx.stroke();
   ctx.fillStyle=dkGold;ctx.beginPath();ctx.ellipse(26,-16+bob-arm*.5+22,7,5,0,0,Math.PI*2);ctx.fill();
   // HELMET with visor
   ctx.shadowBlur=6;ctx.shadowColor=gold;
@@ -795,10 +807,10 @@ function drawInitiate(ctx,x,y,t,state){
   for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(-8+i*4,-62+bob);ctx.lineTo(-7+i*4,-42+bob);ctx.stroke();}
   // Neck
   ctx.fillStyle="rgba(160,195,230,.6)";ctx.strokeStyle=col;ctx.lineWidth=1;
-  ctx.beginPath();ctx.roundRect(-5,-39+bob,10,8,2);ctx.fill();ctx.stroke();
+  rr(ctx,-5,-39+bob,10,8,2);ctx.fill();ctx.stroke();
   // Torso - smooth rounded mannequin body
   ctx.fillStyle="rgba(155,190,228,.6)";ctx.strokeStyle=col;ctx.lineWidth=1.5;
-  ctx.beginPath();ctx.roundRect(-14,-32+bob,28,28,6);ctx.fill();ctx.stroke();
+  rr(ctx,-14,-32+bob,28,28,6);ctx.fill();ctx.stroke();
   // Data flow lines on torso
   ctx.strokeStyle="rgba(100,160,220,.35)";ctx.lineWidth=.8;
   for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(-10+i*6,-30+bob);ctx.lineTo(-9+i*6,-6+bob);ctx.stroke();}
@@ -808,7 +820,7 @@ function drawInitiate(ctx,x,y,t,state){
   [[-14,1],[14,-1]].forEach(([ax,dir])=>{
     ctx.save();ctx.translate(ax,-24+bob);ctx.rotate(dir*armAngle);
     ctx.fillStyle="rgba(148,184,224,.55)";ctx.strokeStyle=col2;ctx.lineWidth=1.2;
-    ctx.beginPath();ctx.roundRect(-5,0,10,24,4);ctx.fill();ctx.stroke();
+    rr(ctx,-5,0,10,24,4);ctx.fill();ctx.stroke();
     // Hand
     ctx.fillStyle="rgba(160,200,235,.65)";ctx.beginPath();ctx.ellipse(0,26,6,5,0,0,Math.PI*2);ctx.fill();
     ctx.restore();
@@ -818,7 +830,7 @@ function drawInitiate(ctx,x,y,t,state){
   [[-7,1],[7,-1]].forEach(([lx,dir])=>{
     ctx.save();ctx.translate(lx,-4+bob);ctx.rotate(dir*legAngle);
     ctx.fillStyle="rgba(145,182,222,.55)";ctx.strokeStyle=col2;ctx.lineWidth=1.2;
-    ctx.beginPath();ctx.roundRect(-5,0,10,28,4);ctx.fill();ctx.stroke();
+    rr(ctx,-5,0,10,28,4);ctx.fill();ctx.stroke();
     // Foot
     ctx.fillStyle="rgba(158,195,232,.65)";ctx.beginPath();ctx.ellipse(0,30,7,4,0,0,Math.PI*2);ctx.fill();
     ctx.restore();
@@ -844,18 +856,18 @@ function drawDecoder(ctx,x,y,t,state){
   ctx.fillStyle="rgba(0,0,0,.3)";ctx.beginPath();ctx.ellipse(0,38,20,7,0,0,Math.PI*2);ctx.fill();
   // BOOTS
   [[-10,0],[10,0]].forEach(([bx])=>{
-    ctx.fillStyle="#334455";ctx.beginPath();ctx.roundRect(bx-7,20+bob,14,10,3);ctx.fill();
+    ctx.fillStyle="#334455";rr(ctx,bx-7,20+bob,14,10,3);ctx.fill();
     ctx.strokeStyle=sil;ctx.lineWidth=1;ctx.stroke();
   });
   // LEG ARMOR
   const legS=Math.sin(t*.14)*(state==="run"?14:2);
   [[-9,legS],[9,-legS]].forEach(([lx,ls])=>{
     ctx.fillStyle=sil+"99";ctx.strokeStyle=lt;ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.roundRect(lx-5,-2+bob+ls*.3,10,22,3);ctx.fill();ctx.stroke();
+    rr(ctx,lx-5,-2+bob+ls*.3,10,22,3);ctx.fill();ctx.stroke();
   });
   // CHEST PLATE
   ctx.fillStyle=sil+"bb";ctx.strokeStyle=lt;ctx.lineWidth=2.5;
-  ctx.beginPath();ctx.roundRect(-14,-30+bob,28,30,4);ctx.fill();ctx.stroke();
+  rr(ctx,-14,-30+bob,28,30,4);ctx.fill();ctx.stroke();
   // APPLE label (exact from image)
   ctx.fillStyle="#ffdd00";ctx.font="bold 8px 'Share Tech Mono'";ctx.textAlign="center";
   ctx.fillText("APPLE",0,-15+bob);
@@ -878,7 +890,7 @@ function drawDecoder(ctx,x,y,t,state){
   const armS=Math.sin(t*.14)*(state==="run"?14:2);
   [[-14,-2+bob+armS*.45],[14,-2+bob-armS*.45]].forEach(([ax,ay],i)=>{
     ctx.fillStyle=sil+"77";ctx.strokeStyle=sil;ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.roundRect(i===0?ax-13:ax,ay,13,20,3);ctx.fill();ctx.stroke();
+    rr(ctx,i===0?ax-13:ax,ay,13,20,3);ctx.fill();ctx.stroke();
     ctx.fillStyle="#445566";ctx.beginPath();ctx.ellipse(i===0?ax-6:ax+6,ay+20,7,5,0,0,Math.PI*2);ctx.fill();
   });
   // HELMET
@@ -903,7 +915,7 @@ function drawSynthesizer(ctx,x,y,t,state){
   ctx.fillStyle="rgba(0,0,0,.35)";ctx.beginPath();ctx.ellipse(0,42,24,8,0,0,Math.PI*2);ctx.fill();
   // POWER BOOTS with glow pads
   [[-11,0],[11,0]].forEach(([bx])=>{
-    ctx.fillStyle="#112233";ctx.beginPath();ctx.roundRect(bx-8,24+bob,16,12,3);ctx.fill();
+    ctx.fillStyle="#112233";rr(ctx,bx-8,24+bob,16,12,3);ctx.fill();
     ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
     const bg=ctx.createRadialGradient(bx,33+bob,0,bx,33+bob,9);
     bg.addColorStop(0,col+"55");bg.addColorStop(1,"transparent");
@@ -913,11 +925,11 @@ function drawSynthesizer(ctx,x,y,t,state){
   const legS=Math.sin(t*.12)*(state==="run"?13:2);
   [[-9,legS],[9,-legS]].forEach(([lx,ls])=>{
     ctx.fillStyle=col+"33";ctx.strokeStyle=col;ctx.lineWidth=2;
-    ctx.beginPath();ctx.roundRect(lx-7,-4+bob+ls*.3,14,28,3);ctx.fill();ctx.stroke();
+    rr(ctx,lx-7,-4+bob+ls*.3,14,28,3);ctx.fill();ctx.stroke();
   });
   // HEAVY CHEST
   ctx.fillStyle=col+"44";ctx.strokeStyle=col;ctx.lineWidth=3;
-  ctx.beginPath();ctx.roundRect(-17,-38+bob,34,32,5);ctx.fill();ctx.stroke();
+  rr(ctx,-17,-38+bob,34,32,5);ctx.fill();ctx.stroke();
   // Text streams from chest - 私は学校へ行きます (exact from image)
   const stxt="私は学校へ行きます";
   for(let i=0;i<9;i++){
@@ -937,7 +949,7 @@ function drawSynthesizer(ctx,x,y,t,state){
   const armS=Math.sin(t*.12)*(state==="run"?13:2);
   [[-17,-6+bob+armS*.45],[17,-6+bob-armS*.45]].forEach(([ax,ay],i)=>{
     ctx.fillStyle=col+"44";ctx.strokeStyle=col;ctx.lineWidth=2.5;
-    ctx.beginPath();ctx.roundRect(i===0?ax-14:ax,ay,14,24,3);ctx.fill();ctx.stroke();
+    rr(ctx,i===0?ax-14:ax,ay,14,24,3);ctx.fill();ctx.stroke();
     // Gauntlet glow
     ctx.shadowBlur=10;ctx.shadowColor=col;
     ctx.fillStyle=col+"55";ctx.beginPath();ctx.ellipse(i===0?ax-7:ax+7,ay+24,9,6,0,0,Math.PI*2);ctx.fill();
@@ -978,16 +990,21 @@ function drawFluentEntity(ctx,x,y,t,state){
 
 function drawForestTile(ctx,cx,cy,tw,th,decor,t,isWall){
   if(isWall){
-    // Wall block with tree growing UP from top
+    // Draw the isometric wall block
     isoBlock(ctx,cx,cy,tw,th,th*1.5,"#1c5a14","#0d2a08","#152210");
-    // Tree grows UPWARD from the top of the block
-    const tx=cx,ty=cy-th*.5;
-    ctx.fillStyle="#0a2008";ctx.beginPath();ctx.moveTo(tx,ty+4);ctx.lineTo(tx-13,ty-22);ctx.lineTo(tx+13,ty-22);ctx.closePath();ctx.fill();
-    ctx.fillStyle="#163810";ctx.beginPath();ctx.moveTo(tx,ty-6);ctx.lineTo(tx-10,ty-26);ctx.lineTo(tx+10,ty-26);ctx.closePath();ctx.fill();
-    ctx.fillStyle="#1e5018";ctx.beginPath();ctx.moveTo(tx,ty-16);ctx.lineTo(tx-7,ty-30);ctx.lineTo(tx+7,ty-30);ctx.closePath();ctx.fill();
-    // Noun label
-    ctx.fillStyle="rgba(0,255,80,.55)";ctx.font="7px 'Share Tech Mono'";ctx.textAlign="center";
-    ctx.fillText("noun",tx,ty-34);
+    // Only draw trees on some interior walls (not every border tile)
+    if(decor>.45){
+      // Tree grows UPWARD from tile top peak (cx,cy is the peak)
+      // In canvas lower Y = higher visually, so cy-N = N pixels above tile top
+      ctx.fillStyle="#0d2808";
+      ctx.beginPath();ctx.moveTo(cx-16,cy-2);ctx.lineTo(cx,cy-48);ctx.lineTo(cx+16,cy-2);ctx.closePath();ctx.fill();
+      ctx.fillStyle="#165512";
+      ctx.beginPath();ctx.moveTo(cx-12,cy-18);ctx.lineTo(cx,cy-56);ctx.lineTo(cx+12,cy-18);ctx.closePath();ctx.fill();
+      ctx.fillStyle="#1e6e18";
+      ctx.beginPath();ctx.moveTo(cx-8,cy-34);ctx.lineTo(cx,cy-62);ctx.lineTo(cx+8,cy-34);ctx.closePath();ctx.fill();
+      // Tree trunk
+      ctx.fillStyle="#3a1800";ctx.fillRect(cx-3,cy-4,6,8);
+    }
     return;
   }
   // Floor tile - green with texture
@@ -1025,7 +1042,7 @@ function drawFactoryTile(ctx,cx,cy,tw,th,decor,t,isWall){
   if(decor>.7){
     const bc=["#ff444466","#44ff4466","#4444ff66","#ffaa0066"][0|decor*4%4];
     const lbl=["S-V-O","VERB","NOUN","ADJ"][0|decor*4%4];
-    ctx.fillStyle=bc;ctx.beginPath();ctx.roundRect(cx-16,cy+th*.25-8,32,16,2);ctx.fill();
+    ctx.fillStyle=bc;rr(ctx,cx-16,cy+th*.25-8,32,16,2);ctx.fill();
     ctx.strokeStyle="rgba(255,200,0,.6)";ctx.lineWidth=1;ctx.stroke();
     ctx.fillStyle="#fff";ctx.font="8px 'Share Tech Mono'";ctx.textAlign="center";ctx.fillText(lbl,cx,cy+th*.25+4);
   }
@@ -1077,7 +1094,7 @@ function drawGlitchTile(ctx,cx,cy,tw,th,decor,t,isWall){
   if(Math.random()>.97){ctx.fillStyle="rgba(255,0,255,.14)";ctx.fillRect(cx-tw*.4,cy,tw*.8,5+Math.random()*6);}
   if(decor>.72){
     // Data cluster
-    ctx.fillStyle="rgba(170,68,255,.28)";ctx.beginPath();ctx.roundRect(cx-19,cy+th*.22,38,16,2);ctx.fill();
+    ctx.fillStyle="rgba(170,68,255,.28)";rr(ctx,cx-19,cy+th*.22,38,16,2);ctx.fill();
     ctx.strokeStyle="rgba(170,68,255,.5)";ctx.lineWidth=1;ctx.stroke();
     ctx.fillStyle="#cc88ff";ctx.font="8px 'Share Tech Mono'";ctx.textAlign="center";
     ctx.fillText(["TRUTH","∅","FREE","???"][0|decor*4%4],cx,cy+th*.22+11);
